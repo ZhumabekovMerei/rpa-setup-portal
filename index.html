@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="ru" data-os="win">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RPA Setup Portal</title>
+<meta name="description" content="Подготовка рабочего места к обучению созданию персональных RPA-роботов через Claude — за ~10 минут.">
+<style>
+  :root {
+    --bg: #f6f5f1;
+    --surface: #ffffff;
+    --surface-2: #f0eee8;
+    --text: #1d1c1a;
+    --muted: #6b6860;
+    --border: #e3e0d8;
+    --accent: #c96442;
+    --accent-ink: #ffffff;
+    --accent-soft: #f7e7df;
+    --ok: #2f7d4f;
+    --ok-soft: #e2f1e7;
+    --warn: #8a5a00;
+    --warn-soft: #fbf0d9;
+    --code-bg: #1f1e1c;
+    --code-text: #f1efe9;
+    --code-muted: #8f8b82;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+    --radius: 14px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #181715;
+      --surface: #22211e;
+      --surface-2: #2a2926;
+      --text: #ecebe6;
+      --muted: #a29e95;
+      --border: #36342f;
+      --accent: #e07a55;
+      --accent-ink: #1b1a18;
+      --accent-soft: #3a2a22;
+      --ok: #6cc28c;
+      --ok-soft: #1f3327;
+      --warn: #e8bb5c;
+      --warn-soft: #3a3020;
+      --code-bg: #121110;
+      --code-text: #ecebe6;
+      --code-muted: #7d7a72;
+      --shadow: 0 1px 2px rgba(0,0,0,.3);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #181715;
+    --surface: #22211e;
+    --surface-2: #2a2926;
+    --text: #ecebe6;
+    --muted: #a29e95;
+    --border: #36342f;
+    --accent: #e07a55;
+    --accent-ink: #1b1a18;
+    --accent-soft: #3a2a22;
+    --ok: #6cc28c;
+    --ok-soft: #1f3327;
+    --warn: #e8bb5c;
+    --warn-soft: #3a3020;
+    --code-bg: #121110;
+    --code-text: #ecebe6;
+    --code-muted: #7d7a72;
+    --shadow: 0 1px 2px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+  code, pre, .mono { font-family: ui-monospace, "Cascadia Code", "SF Mono", Consolas, Menlo, monospace; }
+  :not(pre) > code {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: .05em .4em;
+    border-radius: 6px;
+    font-size: .88em;
+  }
+
+  .layout {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 48px;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar { position: sticky; top: 0; align-self: start; height: 100vh; padding: 40px 0; display: flex; flex-direction: column; gap: 24px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; }
+  .brand-mark {
+    width: 32px; height: 32px; border-radius: 9px; background: var(--accent); color: var(--accent-ink);
+    display: grid; place-items: center; font-size: 15px; font-weight: 800;
+  }
+  .toc { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .toc a {
+    display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 8px;
+    color: var(--muted); text-decoration: none; font-size: 14.5px;
+  }
+  .toc a:hover { background: var(--surface-2); color: var(--text); }
+  .toc a.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+  .toc .n {
+    width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--border);
+    display: grid; place-items: center; font-size: 11.5px; font-weight: 600; flex: none;
+  }
+  .toc a.active .n { border-color: var(--accent); color: var(--accent); }
+
+  .progress-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; font-size: 13.5px; }
+  .progress-card .row { display: flex; justify-content: space-between; color: var(--muted); margin-bottom: 8px; }
+  .progress-card strong { color: var(--text); }
+  .bar { height: 6px; background: var(--surface-2); border-radius: 99px; overflow: hidden; }
+  .bar > span { display: block; height: 100%; width: 0; background: var(--ok); border-radius: 99px; transition: width .3s ease; }
+
+  .theme-toggle {
+    margin-top: auto; align-self: flex-start; background: none; border: 1px solid var(--border); color: var(--muted);
+    border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  .theme-toggle:hover { color: var(--text); }
+
+  /* ---------- Main ---------- */
+  main { padding: 40px 0 64px; min-width: 0; }
+
+  .hero { padding: 24px 0 40px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+  .eyebrow { color: var(--accent); font-weight: 600; font-size: 14px; letter-spacing: .02em; text-transform: uppercase; }
+  h1 { font-size: clamp(30px, 4vw, 44px); line-height: 1.12; letter-spacing: -.025em; margin: 10px 0 16px; max-width: 18ch; }
+  .lead { font-size: 18px; color: var(--muted); max-width: 62ch; margin: 0 0 24px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 99px;
+    background: var(--surface); border: 1px solid var(--border); font-size: 14px;
+  }
+  .chip.accent { background: var(--accent-soft); border-color: transparent; color: var(--text); font-weight: 600; }
+  .chip svg { width: 16px; height: 16px; }
+
+  section { margin-bottom: 56px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; flex-wrap: wrap; }
+  .sec-num { color: var(--accent); font-weight: 700; font-size: 14px; letter-spacing: .02em; }
+  h2 { font-size: 26px; letter-spacing: -.02em; margin: 0; line-height: 1.25; }
+  .time { color: var(--muted); font-size: 14px; }
+  .sec-sub { color: var(--muted); margin: 4px 0 20px; max-width: 70ch; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+
+  /* Requirements */
+  .req-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+  .req { display: flex; gap: 14px; }
+  .req .ic { width: 38px; height: 38px; border-radius: 10px; background: var(--surface-2); display: grid; place-items: center; flex: none; }
+  .req .ic svg { width: 20px; height: 20px; color: var(--accent); }
+  .req h3 { margin: 0 0 2px; font-size: 15.5px; }
+  .req p { margin: 0; color: var(--muted); font-size: 14.5px; }
+  .domains { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .domains code { font-size: 12.5px; }
+
+  /* Accounts */
+  .acc-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+  .acc { display: flex; flex-direction: column; gap: 12px; }
+  .acc-top { display: flex; align-items: center; gap: 12px; }
+  /* App icon tiles */
+  .app {
+    --s: 44px;
+    width: var(--s); height: var(--s); border-radius: calc(var(--s) * .26); flex: none;
+    display: grid; place-items: center; position: relative;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), 0 1px 2px rgba(0,0,0,.12);
+  }
+  .app > svg { width: 58%; height: 58%; }
+  .app.sm { --s: 28px; }
+  .app.xs { --s: 24px; }
+  .app.lg { --s: 72px; }
+  .app.xl { --s: 88px; }
+  .app.claude  { background: #d97757; color: #fff; }
+  .app.desktop { background: #f4f3ee; color: #d97757; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.1); }
+  .app.github  { background: #181717; color: #fff; }
+  .app.gitlab  { background: #fc6d26; color: #fff; }
+  .app.glab    { background: #171321; color: #fc6d26; }
+  .app.python  { background: #3776ab; color: #ffd43b; }
+  .app.git     { background: #f05032; color: #fff; }
+  .app.node    { background: #5fa04e; color: #fff; }
+  .app .badge {
+    position: absolute; right: -4px; bottom: -4px; width: 46%; height: 46%; border-radius: 30%;
+    background: #fff; color: #171321; display: grid; place-items: center; box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  }
+  .app .badge svg { width: 70%; height: 70%; }
+
+  .stack { display: flex; flex-wrap: wrap; gap: 14px 18px; margin-top: 28px; }
+  .stack-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); width: 76px; text-align: center; line-height: 1.25; }
+
+  .tools-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 20px; }
+  .tool { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); min-width: 0; }
+  .tool b { display: block; font-size: 15px; }
+  .tool span { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+  .acc h3 { margin: 0; font-size: 17px; }
+  .acc .why { color: var(--muted); font-size: 14px; margin: 0; flex: 1; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 9px 16px; border-radius: 10px; font: inherit; font-size: 14.5px; font-weight: 600;
+    text-decoration: none; cursor: pointer; border: 1px solid transparent; transition: transform .05s, background .15s, border-color .15s;
+    white-space: nowrap;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-ghost { background: transparent; color: var(--text); border-color: var(--border); }
+  .btn-ghost:hover { background: var(--surface-2); }
+  .btn-lg { padding: 14px 22px; font-size: 16px; border-radius: 12px; }
+  .btn svg { width: 17px; height: 17px; }
+
+  /* Steps */
+  .steps { list-style: none; counter-reset: s; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+  .steps li { counter-increment: s; display: flex; gap: 14px; }
+  .steps li::before {
+    content: counter(s); width: 26px; height: 26px; border-radius: 50%; background: var(--surface-2);
+    display: grid; place-items: center; font-size: 13px; font-weight: 700; flex: none; margin-top: 1px;
+  }
+
+  .desktop-card { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 28px; align-items: center; }
+  .dl-box { text-align: center; padding: 22px 26px; border-radius: 12px; background: var(--surface-2); }
+  .dl-box small { display: block; color: var(--muted); margin-top: 10px; font-size: 12.5px; }
+
+  .note {
+    display: flex; gap: 12px; padding: 12px 16px; border-radius: 10px; font-size: 14.5px; margin-top: 16px;
+    background: var(--warn-soft); color: var(--text);
+  }
+  .note svg { width: 18px; height: 18px; color: var(--warn); flex: none; margin-top: 3px; }
+  .note.info { background: var(--surface-2); }
+  .note.info svg { color: var(--muted); }
+
+  /* OS switch (global) */
+  html[data-os="win"] [data-only="mac"],
+  html[data-os="mac"] [data-only="win"] { display: none !important; }
+
+  .os-picker {
+    margin-top: 28px; padding: 18px 20px; border-radius: var(--radius); background: var(--surface);
+    border: 1px solid var(--border); box-shadow: var(--shadow);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap;
+  }
+  .os-picker-label b { display: block; font-size: 16px; }
+  .os-picker-label span { color: var(--muted); font-size: 14px; }
+  .os-switch { display: inline-flex; background: var(--surface-2); border-radius: 12px; padding: 4px; gap: 4px; }
+  .os-btn {
+    display: inline-flex; align-items: center; gap: 9px; border: 0; background: transparent; color: var(--muted);
+    font: inherit; font-size: 15px; font-weight: 600; padding: 10px 20px; border-radius: 9px; cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .os-btn svg { width: 18px; height: 18px; }
+  .os-btn:hover { color: var(--text); }
+  .os-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); box-shadow: var(--shadow); }
+  .os-switch.compact { width: 100%; }
+  .os-switch.compact .os-btn { flex: 1; justify-content: center; padding: 7px 8px; font-size: 13.5px; }
+  .os-switch.compact .os-btn svg { width: 15px; height: 15px; }
+  .os-tag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted);
+    background: var(--surface-2); border-radius: 99px; padding: 3px 10px 3px 8px;
+  }
+  .os-tag svg { width: 14px; height: 14px; }
+
+  /* Code blocks */
+  .code {
+    background: var(--code-bg); color: var(--code-text); border-radius: 12px; overflow: hidden; margin: 12px 0;
+  }
+  .code-head {
+    display: flex; justify-content: space-between; align-items: center; padding: 8px 10px 8px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.07); font-size: 12.5px; color: var(--code-muted);
+  }
+  .copy {
+    display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06); color: var(--code-text); border-radius: 8px; padding: 5px 11px;
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .copy:hover { background: rgba(255,255,255,.12); }
+  .copy.done { background: #2f7d4f; border-color: #2f7d4f; color: #fff; }
+  .copy svg { width: 14px; height: 14px; }
+  .code pre { margin: 0; padding: 14px 16px 16px; overflow-x: auto; font-size: 14px; line-height: 1.7; }
+  .code .p { color: var(--code-muted); user-select: none; }
+  .code .k { color: #f0a77f; }
+  .code .c { color: var(--code-muted); }
+
+  .substep { margin-top: 26px; }
+  .substep h3 { font-size: 17px; margin: 0 0 4px; }
+  .substep p { margin: 0 0 6px; color: var(--muted); }
+
+  .expect { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-top: 4px; }
+  .expect > div { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .expect b { display: block; font-family: ui-monospace, Consolas, Menlo, monospace; font-size: 13px; }
+  .expect span { color: var(--muted); }
+
+  /* Checklist */
+  .check-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+  .check-count { font-size: 15px; color: var(--muted); }
+  .check-count strong { color: var(--text); font-size: 20px; }
+  .checklist { list-style: none; margin: 0; padding: 0; }
+  .checklist li + li { border-top: 1px solid var(--border); }
+  .checklist label { display: flex; gap: 14px; align-items: center; padding: 12px 4px; cursor: pointer; }
+  .checklist input { position: absolute; opacity: 0; pointer-events: none; }
+  .box {
+    width: 22px; height: 22px; border-radius: 7px; border: 1.8px solid var(--border); flex: none;
+    display: grid; place-items: center; transition: background .15s, border-color .15s;
+  }
+  .box svg { width: 14px; height: 14px; color: #fff; opacity: 0; transition: opacity .15s; }
+  .checklist input:checked + .box { background: var(--ok); border-color: var(--ok); }
+  .checklist input:checked + .box svg { opacity: 1; }
+  .checklist input:checked ~ .txt { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--border); }
+  .checklist input:focus-visible + .box { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .checklist .txt { flex: 1; }
+  .tag { font-size: 12px; color: var(--muted); background: var(--surface-2); border-radius: 6px; padding: 2px 8px; white-space: nowrap; }
+
+  .success {
+    display: none; margin-top: 16px; padding: 16px 18px; border-radius: 12px; background: var(--ok-soft);
+    align-items: center; gap: 12px; font-weight: 600;
+  }
+  .success.show { display: flex; }
+  .success svg { width: 22px; height: 22px; color: var(--ok); flex: none; }
+
+  /* Troubleshooting */
+  .faq { display: flex; flex-direction: column; gap: 10px; }
+  details { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+  summary {
+    list-style: none; cursor: pointer; padding: 14px 18px; display: flex; align-items: center; gap: 12px; font-weight: 600;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: ""; margin-left: auto; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+    transform: rotate(45deg); transition: transform .2s; flex: none;
+  }
+  details[open] summary::after { transform: rotate(-135deg); }
+  .faq-body { padding: 0 18px 16px; color: var(--muted); font-size: 15px; }
+  .faq-body p { margin: 0 0 4px; }
+  .faq-body b { color: var(--text); font-weight: 600; }
+
+  footer { border-top: 1px solid var(--border); padding-top: 28px; color: var(--muted); font-size: 14.5px; display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  footer b { color: var(--text); }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+    background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    transition: opacity .2s, transform .2s; z-index: 10;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: minmax(0,1fr); gap: 0; padding: 0 16px; }
+    .sidebar { position: static; height: auto; padding: 20px 0 0; flex-direction: row; align-items: center; justify-content: space-between; }
+    .toc, .progress-card, .sidebar .os-switch { display: none; }
+    .theme-toggle { margin-top: 0; }
+    .acc-grid { grid-template-columns: minmax(0,1fr); }
+    .desktop-card { grid-template-columns: minmax(0,1fr); }
+    .expect { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .tools-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
+  @media (max-width: 640px) {
+    .req-grid { grid-template-columns: minmax(0,1fr); }
+    .hero { padding-top: 8px; }
+    .lead { font-size: 16.5px; }
+    h2 { font-size: 22px; }
+    .card { padding: 18px; }
+    .checklist label { align-items: flex-start; }
+    .tag { display: none; }
+    .tools-grid { grid-template-columns: minmax(0,1fr); }
+    .stack { gap: 12px; }
+    .stack-item { width: 64px; }
+    .os-switch:not(.compact) { width: 100%; }
+    .os-switch:not(.compact) .os-btn { flex: 1; justify-content: center; padding: 10px 8px; }
+  }
+  @media print {
+    .sidebar, .copy, .theme-toggle, .toast { display: none !important; }
+    .layout { display: block; }
+    details { break-inside: avoid; }
+    details > .faq-body { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17.5v.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/></symbol>
+  <symbol id="i-os" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.3-4 4.3-6 8-6s6.7 2 8 6"/></symbol>
+  <!-- Brand logos: Simple Icons (simpleicons.org), CC0 -->
+  <symbol id="l-claude" viewBox="0 0 24 24" fill="currentColor"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></symbol>
+  <symbol id="l-github" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
+  <symbol id="l-gitlab" viewBox="0 0 24 24" fill="currentColor"><path d="m23.6004 9.5927-.0337-.0862L20.3.9814a.851.851 0 0 0-.3362-.405.8748.8748 0 0 0-.9997.0539.8748.8748 0 0 0-.29.4399l-2.2055 6.748H7.5375l-2.2057-6.748a.8573.8573 0 0 0-.29-.4412.8748.8748 0 0 0-.9997-.0537.8585.8585 0 0 0-.3362.4049L.4332 9.5015l-.0325.0862a6.0657 6.0657 0 0 0 2.0119 7.0105l.0113.0087.03.0213 4.976 3.7264 2.462 1.8633 1.4995 1.1321a1.0085 1.0085 0 0 0 1.2197 0l1.4995-1.1321 2.4619-1.8633 5.006-3.7489.0125-.01a6.0682 6.0682 0 0 0 2.0094-7.003z"/></symbol>
+  <symbol id="l-python" viewBox="0 0 24 24" fill="currentColor"><path d="M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.34.11-.31.17-.28.25-.26.31-.23.38-.2.44-.18.51-.15.58-.12.64-.1.71-.06.77-.04.84-.02 1.27.05zm-6.3 1.98l-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09zm13.09 3.95l.28.06.32.12.35.18.36.27.36.35.35.47.32.59.28.73.21.88.14 1.04.05 1.23-.06 1.23-.16 1.04-.24.86-.32.71-.36.57-.4.45-.42.33-.42.24-.4.16-.36.09-.32.05-.24.02-.16-.01h-8.22v.82h5.84l.01 2.76.02.36-.05.34-.11.31-.17.29-.25.25-.31.24-.38.2-.44.17-.51.15-.58.13-.64.09-.71.07-.77.04-.84.01-1.27-.04-1.07-.14-.9-.2-.73-.25-.59-.3-.45-.33-.34-.34-.25-.34-.16-.33-.1-.3-.04-.25-.02-.2.01-.13v-5.34l.05-.64.13-.54.21-.46.26-.38.3-.32.33-.24.35-.2.35-.14.33-.1.3-.06.26-.04.21-.02.13-.01h5.84l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.28.02-.21V6.07h2.09l.14.01zm-6.47 14.25l-.23.33-.08.41.08.41.23.33.33.23.41.08.41-.08.33-.23.23-.33.08-.41-.08-.41-.23-.33-.33-.23-.41-.08-.41.08z"/></symbol>
+  <symbol id="l-git" viewBox="0 0 24 24" fill="currentColor"><path d="M23.546 10.93L13.067.452c-.604-.603-1.582-.603-2.188 0L8.708 2.627l2.76 2.76c.645-.215 1.379-.07 1.889.441.516.515.658 1.258.438 1.9l2.658 2.66c.645-.223 1.387-.078 1.9.435.721.72.721 1.884 0 2.604-.719.719-1.881.719-2.6 0-.539-.541-.674-1.337-.404-1.996L12.86 8.955v6.525c.176.086.342.203.488.348.713.721.713 1.883 0 2.6-.719.721-1.889.721-2.609 0-.719-.719-.719-1.879 0-2.598.182-.18.387-.316.605-.406V8.835c-.217-.091-.424-.222-.6-.401-.545-.545-.676-1.342-.396-2.009L7.636 3.7.45 10.881c-.6.605-.6 1.584 0 2.189l10.48 10.477c.604.604 1.582.604 2.186 0l10.43-10.43c.605-.603.605-1.582 0-2.187"/></symbol>
+  <symbol id="l-node" viewBox="0 0 24 24" fill="currentColor"><path d="M11.998,24c-0.321,0-0.641-0.084-0.922-0.247l-2.936-1.737c-0.438-0.245-0.224-0.332-0.08-0.383 c0.585-0.203,0.703-0.25,1.328-0.604c0.065-0.037,0.151-0.023,0.218,0.017l2.256,1.339c0.082,0.045,0.197,0.045,0.272,0l8.795-5.076 c0.082-0.047,0.134-0.141,0.134-0.238V6.921c0-0.099-0.053-0.192-0.137-0.242l-8.791-5.072c-0.081-0.047-0.189-0.047-0.271,0 L3.075,6.68C2.99,6.729,2.936,6.825,2.936,6.921v10.15c0,0.097,0.054,0.189,0.139,0.235l2.409,1.392 c1.307,0.654,2.108-0.116,2.108-0.89V7.787c0-0.142,0.114-0.253,0.256-0.253h1.115c0.139,0,0.255,0.112,0.255,0.253v10.021 c0,1.745-0.95,2.745-2.604,2.745c-0.508,0-0.909,0-2.026-0.551L2.28,18.675c-0.57-0.329-0.922-0.945-0.922-1.604V6.921 c0-0.659,0.353-1.275,0.922-1.603l8.795-5.082c0.557-0.315,1.296-0.315,1.848,0l8.794,5.082c0.57,0.329,0.924,0.944,0.924,1.603 v10.15c0,0.659-0.354,1.273-0.924,1.604l-8.794,5.078C12.643,23.916,12.324,24,11.998,24z M19.099,13.993 c0-1.9-1.284-2.406-3.987-2.763c-2.731-0.361-3.009-0.548-3.009-1.187c0-0.528,0.235-1.233,2.258-1.233 c1.807,0,2.473,0.389,2.747,1.607c0.024,0.115,0.129,0.199,0.247,0.199h1.141c0.071,0,0.138-0.031,0.186-0.081 c0.048-0.054,0.074-0.123,0.067-0.196c-0.177-2.098-1.571-3.076-4.388-3.076c-2.508,0-4.004,1.058-4.004,2.833 c0,1.925,1.488,2.457,3.895,2.695c2.88,0.282,3.103,0.703,3.103,1.269c0,0.983-0.789,1.402-2.642,1.402 c-2.327,0-2.839-0.584-3.011-1.742c-0.02-0.124-0.126-0.215-0.253-0.215h-1.137c-0.141,0-0.254,0.112-0.254,0.253 c0,1.482,0.806,3.248,4.655,3.248C17.501,17.007,19.099,15.91,19.099,13.993z"/></symbol>
+  <symbol id="l-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l5 5-5 5M12 18h7"/></symbol>
+  <symbol id="l-apple" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></symbol>
+  <symbol id="l-windows" viewBox="0 0 24 24" fill="currentColor"><path d="M2 3.5l8.5-1.2v8.9H2zM11.7 2.1L22 .6v10.6H11.7zM2 12.4h8.5v8.9L2 20.1zM11.7 12.4H22V23l-10.3-1.4z"/></symbol>
+  <symbol id="i-party" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
+</svg>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">R</span> RPA Setup Portal</div>
+    <ul class="toc" id="toc">
+      <li><a href="#before"><span class="n">0</span>Перед началом</a></li>
+      <li><a href="#accounts"><span class="n">1</span>Аккаунты</a></li>
+      <li><a href="#desktop"><span class="n">2</span>Claude Desktop</a></li>
+      <li><a href="#cli"><span class="n">3</span>Инструменты</a></li>
+      <li><a href="#glab"><span class="n">4</span>GitLab CLI</a></li>
+      <li><a href="#check"><span class="n">✓</span>Проверь себя</a></li>
+      <li><a href="#help"><span class="n">?</span>Если не работает</a></li>
+    </ul>
+    <div class="os-switch compact" role="group" aria-label="Операционная система">
+      <button class="os-btn" type="button" data-os="win" aria-pressed="true"><svg><use href="#l-windows"/></svg>Windows</button>
+      <button class="os-btn" type="button" data-os="mac" aria-pressed="false"><svg><use href="#l-apple"/></svg>macOS</button>
+    </div>
+    <div class="progress-card">
+      <div class="row"><span>Готовность</span><strong id="sideCount">0 / 9</strong></div>
+      <div class="bar"><span id="sideBar"></span></div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" type="button">Тема: авто</button>
+  </aside>
+
+  <main>
+
+    <header class="hero">
+      <div class="eyebrow">Подготовка к обучению</div>
+      <h1>Рабочее место для персональных RPA-роботов на Claude</h1>
+      <p class="lead">Установите всё нужное до начала занятия, чтобы на обучении сразу перейти к практике: автоматизации рутинных процессов через Claude Desktop, Python и репозитории GitHub/GitLab.</p>
+      <div class="chips">
+        <span class="chip accent"><svg><use href="#i-clock"/></svg>Займёт ~10 минут</span>
+        <span class="chip" data-only="win"><svg><use href="#l-windows"/></svg>Windows 10 / 11</span>
+        <span class="chip" data-only="mac"><svg><use href="#l-apple"/></svg>macOS</span>
+        <span class="chip"><svg><use href="#i-user"/></svg>3 аккаунта · 5 программ</span>
+      </div>
+      <div class="stack" aria-label="Что понадобится">
+        <div class="stack-item"><span class="app claude"><svg><use href="#l-claude"/></svg></span>Claude</div>
+        <div class="stack-item"><span class="app github"><svg><use href="#l-github"/></svg></span>GitHub</div>
+        <div class="stack-item"><span class="app gitlab"><svg><use href="#l-gitlab"/></svg></span>GitLab</div>
+        <div class="stack-item"><span class="app desktop"><svg><use href="#l-claude"/></svg></span>Claude Desktop</div>
+        <div class="stack-item"><span class="app python"><svg><use href="#l-python"/></svg></span>Python 3.12</div>
+        <div class="stack-item"><span class="app git"><svg><use href="#l-git"/></svg></span>Git</div>
+        <div class="stack-item"><span class="app glab"><svg><use href="#l-gitlab"/></svg><span class="badge"><svg><use href="#l-terminal"/></svg></span></span>GitLab CLI</div>
+        <div class="stack-item"><span class="app node"><svg><use href="#l-node"/></svg></span>Node.js</div>
+      </div>
+      <div class="os-picker">
+        <div class="os-picker-label"><b>Выберите вашу систему</b><span>Вся инструкция ниже перестроится под неё.</span></div>
+        <div class="os-switch" role="group" aria-label="Операционная система">
+          <button class="os-btn" type="button" data-os="win" aria-pressed="true"><svg><use href="#l-windows"/></svg>Windows</button>
+          <button class="os-btn" type="button" data-os="mac" aria-pressed="false"><svg><use href="#l-apple"/></svg>macOS</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 0. Перед началом -->
+    <section id="before">
+      <div class="sec-head"><span class="sec-num">ШАГ 0</span><h2>Перед началом</h2></div>
+      <p class="sec-sub">Проверьте, что компьютер подходит. Если что-то не так — сразу обратитесь к ИТ-поддержке.</p>
+      <div class="card req-grid">
+        <div class="req">
+          <div class="ic"><svg><use href="#i-os"/></svg></div>
+          <div><h3>Операционная система</h3>
+            <p data-only="win">Windows 10 (версия 1809+) или Windows 11, 64-bit. Команда <code>winget</code> уже встроена.</p>
+            <p data-only="mac">macOS 13 Ventura или новее, на Apple Silicon (M1–M4) или Intel. Программы ставятся через Homebrew.</p>
+          </div>
+        </div>
+        <div class="req">
+          <div class="ic"><svg><use href="#i-shield"/></svg></div>
+          <div><h3>Права администратора</h3>
+            <p data-only="win">Желательны — для установки программ и корректного прописывания в PATH.</p>
+            <p data-only="mac">Нужен пароль от вашей учётной записи Mac: Homebrew попросит его при установке.</p>
+          </div>
+        </div>
+        <div class="req">
+          <div class="ic"><svg><use href="#i-globe"/></svg></div>
+          <div><h3>Доступ в интернет</h3><p>Открыт доступ к доменам:</p>
+            <div class="domains"><code>claude.ai</code><code>claude.com</code><code>github.com</code><code>gitlab.com</code><code data-only="win">python.org</code><code data-only="win">winget</code><code data-only="mac">brew.sh</code><code data-only="mac">raw.githubusercontent.com</code><code data-only="mac">ghcr.io</code></div>
+          </div>
+        </div>
+        <div class="req">
+          <div class="ic"><svg><use href="#i-user"/></svg></div>
+          <div><h3>Аккаунты</h3><p>Claude, GitHub и GitLab. Нет аккаунта — зарегистрируйтесь на шаге 1, это бесплатно.</p></div>
+        </div>
+      </div>
+      <div class="note info"><svg><use href="#i-info"/></svg><div>VS Code и другие редакторы <b>не нужны</b>. Инструкция показана для <b data-only="win">Windows</b><b data-only="mac">macOS</b> — сменить систему можно переключателем вверху страницы.</div></div>
+    </section>
+
+    <!-- 1. Аккаунты -->
+    <section id="accounts">
+      <div class="sec-head"><span class="sec-num">ШАГ 1</span><h2>Аккаунты</h2><span class="time">≈ 2–3 мин</span></div>
+      <p class="sec-sub">Сделайте это первым. На каждом сервисе <b>войдите в свой аккаунт</b>, а если его нет — <b>зарегистрируйтесь</b>.</p>
+      <div class="acc-grid">
+        <div class="card acc">
+          <div class="acc-top"><span class="app claude"><svg><use href="#l-claude"/></svg></span><h3>Claude</h3></div>
+          <p class="why">Основной инструмент обучения. Этот же аккаунт нужен в Claude Desktop.</p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="https://claude.ai/login" target="_blank" rel="noopener">Войти</a>
+            <a class="btn btn-ghost" href="https://claude.ai/login" target="_blank" rel="noopener">Зарегистрироваться</a>
+          </div>
+        </div>
+        <div class="card acc">
+          <div class="acc-top"><span class="app github"><svg><use href="#l-github"/></svg></span><h3>GitHub</h3></div>
+          <p class="why">Хранение кода роботов и работа с репозиториями.</p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="https://github.com/login" target="_blank" rel="noopener">Войти</a>
+            <a class="btn btn-ghost" href="https://github.com/signup" target="_blank" rel="noopener">Зарегистрироваться</a>
+          </div>
+        </div>
+        <div class="card acc">
+          <div class="acc-top"><span class="app gitlab"><svg><use href="#l-gitlab"/></svg></span><h3>GitLab</h3></div>
+          <p class="why">Нужен для GitLab CLI (<code>glab</code>) на шаге 4.</p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="https://gitlab.com/users/sign_in" target="_blank" rel="noopener">Войти</a>
+            <a class="btn btn-ghost" href="https://gitlab.com/users/sign_up" target="_blank" rel="noopener">Зарегистрироваться</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Claude Desktop -->
+    <section id="desktop">
+      <div class="sec-head"><span class="sec-num">ШАГ 2</span><h2>Claude Desktop</h2><span class="time">≈ 2–3 мин</span></div>
+      <p class="sec-sub">Настольное приложение Claude — в нём мы будем создавать роботов.</p>
+      <div class="card desktop-card">
+        <ol class="steps" data-only="win">
+          <li><div>Нажмите <b>«Скачать Claude Desktop»</b> — откроется официальная страница, там выберите <b>«Download for Windows»</b>. Скачается файл вида <code>Claude-Setup-x64.exe</code>.</div></li>
+          <li><div>Запустите скачанный <code>.exe</code> и пройдите мастер установки со значениями по умолчанию.</div></li>
+          <li><div>Откройте Claude из меню «Пуск» и <b>войдите в тот же аккаунт Claude</b>, что на шаге 1.</div></li>
+        </ol>
+        <ol class="steps" data-only="mac">
+          <li><div>Нажмите <b>«Скачать Claude Desktop»</b> — откроется официальная страница, там выберите <b>«Download for macOS»</b>. Скачается файл <code>Claude.dmg</code>.</div></li>
+          <li><div>Откройте <code>Claude.dmg</code> из «Загрузок» и <b>перетащите значок Claude в папку «Программы»</b> (Applications).</div></li>
+          <li><div>Запустите Claude из Launchpad или папки «Программы». Если macOS спросит, открыть ли приложение из интернета, — нажмите <b>«Открыть»</b>.</div></li>
+          <li><div><b>Войдите в тот же аккаунт Claude</b>, что на шаге 1.</div></li>
+        </ol>
+        <div class="dl-box">
+          <span class="app desktop xl" style="margin:0 auto 16px"><svg><use href="#l-claude"/></svg></span>
+          <a class="btn btn-primary btn-lg" href="https://claude.ai/download" target="_blank" rel="noopener"><svg><use href="#i-download"/></svg>Скачать Claude Desktop</a>
+          <small>claude.ai/download · официальный источник</small>
+        </div>
+      </div>
+      <div class="note"><svg><use href="#i-alert"/></svg><div>Скачивайте только с официального сайта <b>claude.ai</b> / <b>claude.com</b>. Сторонние «зеркала»<span data-only="win"> и версии из Microsoft Store</span> не используйте.</div></div>
+    </section>
+
+    <!-- 3. CLI -->
+    <section id="cli">
+      <div class="sec-head"><span class="sec-num">ШАГ 3</span><h2>Инструменты командной строки</h2><span class="time">≈ 5 мин</span></div>
+      <p class="sec-sub">Python 3.12, Git, GitLab CLI и Node.js (нужен для MCP-серверов Claude) ставятся <span data-only="win">одним блоком команд через <code>winget</code></span><span data-only="mac">парой команд через Homebrew</span>.</p>
+
+      <div class="tools-grid">
+        <div class="tool"><span class="app python"><svg><use href="#l-python"/></svg></span><div><b>Python 3.12</b><span>Язык для роботов</span></div></div>
+        <div class="tool"><span class="app git"><svg><use href="#l-git"/></svg></span><div><b>Git</b><span>Контроль версий</span></div></div>
+        <div class="tool"><span class="app glab"><svg><use href="#l-gitlab"/></svg><span class="badge"><svg><use href="#l-terminal"/></svg></span></span><div><b>GitLab CLI</b><span>Команда <code>glab</code></span></div></div>
+        <div class="tool"><span class="app node"><svg><use href="#l-node"/></svg></span><div><b>Node.js LTS</b><span>Для MCP-серверов</span></div></div>
+      </div>
+
+      <div class="card">
+        <!-- Windows -->
+        <div data-only="win">
+          <div class="substep" style="margin-top:0">
+            <h3>1. Установите всё одной вставкой</h3>
+            <p>Откройте <b>PowerShell</b> или «Терминал» (Пуск → введите «PowerShell»), нажмите «Копировать» и вставьте блок целиком (<kbd>Ctrl</kbd>+<kbd>V</kbd> или правый клик), затем <kbd>Enter</kbd>.</p>
+            <div class="code">
+              <div class="code-head"><span>PowerShell</span><button class="copy" type="button" data-copy="win-install"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
+<pre id="win-install"><span class="k">winget</span> install -e --id Python.Python.3.12
+<span class="k">winget</span> install -e --id Git.Git
+<span class="k">winget</span> install -e --id glab.glab
+<span class="k">winget</span> install -e --id OpenJS.NodeJS.LTS</pre>
+            </div>
+            <div class="note info" style="margin-top:0"><svg><use href="#i-info"/></svg><div>Если появится запрос на согласие с условиями источника — нажмите <code>Y</code> и <kbd>Enter</kbd>.</div></div>
+          </div>
+
+          <div class="substep">
+            <h3>2. Перезапустите терминал и проверьте</h3>
+            <p><b>Закройте и заново откройте</b> PowerShell, чтобы обновился PATH. Затем выполните:</p>
+            <div class="code">
+              <div class="code-head"><span>PowerShell</span><button class="copy" type="button" data-copy="win-check"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
+<pre id="win-check"><span class="k">python</span> --version
+<span class="k">git</span> --version
+<span class="k">glab</span> --version
+<span class="k">node</span> --version</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- macOS -->
+        <div data-only="mac">
+          <div class="substep" style="margin-top:0">
+            <h3>1. Откройте Терминал и проверьте Homebrew</h3>
+            <p>Нажмите <kbd>⌘</kbd>+<kbd>Пробел</kbd>, введите «Терминал» и нажмите <kbd>Enter</kbd>. Затем выполните:</p>
+            <div class="code">
+              <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-brewcheck"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
+<pre id="mac-brewcheck"><span class="k">brew</span> --version</pre>
+            </div>
+            <p>Показалась версия <code>Homebrew 4.x</code> — <b>сразу переходите к пункту 4</b>. Пишет <code>command not found</code> — сделайте пункты 2 и 3.</p>
+          </div>
+
+          <div class="substep">
+            <h3>2. Установите Homebrew</h3>
+            <p>Официальная команда с сайта <a href="https://brew.sh" target="_blank" rel="noopener">brew.sh</a>:</p>
+            <div class="code">
+              <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-brew"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
+<pre id="mac-brew"><span class="k">/bin/bash</span> -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</pre>
+            </div>
+            <div class="note info" style="margin-top:0"><svg><use href="#i-info"/></svg><div>Терминал попросит <b>пароль от Mac</b>: при вводе символы не отображаются, это нормально. Затем нажмите <kbd>Enter</kbd> для подтверждения. Если macOS предложит установить «Инструменты командной строки» (Command Line Tools), нажмите <b>«Установить»</b> и дождитесь окончания.</div></div>
+          </div>
+
+          <div class="substep">
+            <h3>3. Подключите Homebrew к терминалу</h3>
+            <p>Только для Mac на <b>Apple Silicon (M1–M4)</b>. На Intel-Mac этот пункт пропустите. Узнать процессор: меню Apple → «Об этом Mac» → строка «Чип» (Apple M…) или «Процессор» (Intel).</p>
+            <div class="code">
+              <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-path"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
+<pre id="mac-path"><span class="k">echo</span> 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+<span class="k">eval</span> "$(/opt/homebrew/bin/brew shellenv)"</pre>
+            </div>
+          </div>
+
+          <div class="substep">
+            <h3>4. Установите все инструменты одной командой</h3>
+            <div class="code">
+              <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-install"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
+<pre id="mac-install"><span class="k">brew</span> install python@3.12 git glab node</pre>
+            </div>
+          </div>
+
+          <div class="substep">
+            <h3>5. Перезапустите терминал и проверьте</h3>
+            <p><b>Закройте окно Терминала</b> (<kbd>⌘</kbd>+<kbd>Q</kbd>) и откройте заново. Затем выполните:</p>
+            <div class="code">
+              <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-check"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
+<pre id="mac-check"><span class="k">python3.12</span> --version
+<span class="k">git</span> --version
+<span class="k">glab</span> --version
+<span class="k">node</span> --version</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <h3>Что должно получиться</h3>
+          <p>Каждая команда выводит номер версии:</p>
+          <div class="expect">
+            <div><span class="app sm python"><svg><use href="#l-python"/></svg></span><div><b data-only="win">python</b><b data-only="mac">python3.12</b><span>Python 3.12.x</span></div></div>
+            <div><span class="app sm git"><svg><use href="#l-git"/></svg></span><div><b>git</b><span>git version 2.x</span></div></div>
+            <div><span class="app sm glab"><svg><use href="#l-gitlab"/></svg></span><div><b>glab</b><span>glab 1.x</span></div></div>
+            <div><span class="app sm node"><svg><use href="#l-node"/></svg></span><div><b>node</b><span>v22.x или новее</span></div></div>
+          </div>
+          <div class="note info"><svg><use href="#i-info"/></svg><div data-only="win">Команда «не распознаётся»? Перезапустите терминал ещё раз или выйдите из Windows и войдите снова.</div><div data-only="mac">Пишет <code>command not found</code>? Перезапустите Терминал. Если не помогло — выполните пункт 3 и повторите проверку.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. glab -->
+    <section id="glab">
+      <div class="sec-head"><span class="sec-num">ШАГ 4</span><h2>Привязка GitLab CLI</h2><span class="time">≈ 1 мин</span></div>
+      <p class="sec-sub">Свяжите <code>glab</code> со своим аккаунтом GitLab из шага 1.</p>
+      <div class="card">
+        <div class="code" style="margin-top:0">
+          <div class="code-head"><span data-only="win">PowerShell</span><span data-only="mac">Терминал</span><button class="copy" type="button" data-copy="glab-login"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
+<pre id="glab-login"><span class="k">glab</span> auth login</pre>
+        </div>
+        <ol class="steps" style="margin-top:16px">
+          <li><div>На вопрос о сервере выберите <code>gitlab.com</code>.</div></li>
+          <li><div>Способ входа — <b>через браузер</b> (Web).</div></li>
+          <li><div>В открывшемся окне войдите в <b>тот же аккаунт GitLab</b> и подтвердите доступ. В терминале появится сообщение об успешном входе.</div></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Чек-лист -->
+    <section id="check">
+      <div class="sec-head"><span class="sec-num">ФИНАЛ</span><h2>Проверь себя</h2></div>
+      <p class="sec-sub">Отметьте каждый пункт. Отметки хранятся только в вашем браузере — никакие данные не собираются.</p>
+      <div class="card">
+        <div class="check-head">
+          <div class="check-count"><strong id="count">0</strong> из 9 готово</div>
+          <button class="btn btn-ghost" type="button" id="reset">Сбросить</button>
+        </div>
+        <div class="bar" style="margin-bottom:8px"><span id="mainBar"></span></div>
+        <ul class="checklist" id="checklist">
+          <li><label><input type="checkbox" data-id="claude"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs claude"><svg><use href="#l-claude"/></svg></span><span class="txt">Выполнен вход в аккаунт <b>Claude</b> — на claude.ai и в Claude Desktop</span><span class="tag">Шаг 1–2</span></label></li>
+          <li><label><input type="checkbox" data-id="github"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs github"><svg><use href="#l-github"/></svg></span><span class="txt">Выполнен вход в <b>GitHub</b></span><span class="tag">Шаг 1</span></label></li>
+          <li><label><input type="checkbox" data-id="gitlab"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs gitlab"><svg><use href="#l-gitlab"/></svg></span><span class="txt">Выполнен вход в <b>GitLab</b></span><span class="tag">Шаг 1</span></label></li>
+          <li><label><input type="checkbox" data-id="desktop"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs desktop"><svg><use href="#l-claude"/></svg></span><span class="txt"><b>Claude Desktop</b> установлен и открывается</span><span class="tag">Шаг 2</span></label></li>
+          <li><label><input type="checkbox" data-id="python"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs python"><svg><use href="#l-python"/></svg></span><span class="txt"><code data-only="win">python --version</code><code data-only="mac">python3.12 --version</code> показывает 3.12.x</span><span class="tag">Шаг 3</span></label></li>
+          <li><label><input type="checkbox" data-id="git"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs git"><svg><use href="#l-git"/></svg></span><span class="txt"><code>git --version</code> показывает версию</span><span class="tag">Шаг 3</span></label></li>
+          <li><label><input type="checkbox" data-id="glab"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs glab"><svg><use href="#l-gitlab"/></svg></span><span class="txt"><code>glab --version</code> показывает версию</span><span class="tag">Шаг 3</span></label></li>
+          <li><label><input type="checkbox" data-id="node"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs node"><svg><use href="#l-node"/></svg></span><span class="txt"><code>node --version</code> показывает версию</span><span class="tag">Шаг 3</span></label></li>
+          <li><label><input type="checkbox" data-id="glabauth"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs glab"><svg><use href="#l-gitlab"/></svg></span><span class="txt"><code>glab auth login</code> выполнен успешно</span><span class="tag">Шаг 4</span></label></li>
+        </ul>
+        <div class="success" id="success"><svg><use href="#i-party"/></svg>Всё готово! Рабочее место настроено — увидимся на обучении.</div>
+      </div>
+    </section>
+
+    <!-- Если не работает -->
+    <section id="help">
+      <div class="sec-head"><span class="sec-num">ПОМОЩЬ</span><h2>Если не работает</h2></div>
+      <p class="sec-sub">Типовые проблемы и их решения. Нажмите на симптом, чтобы раскрыть.</p>
+      <div class="faq">
+        <details data-only="mac">
+          <summary><code>brew: command not found</code> после установки Homebrew</summary>
+          <div class="faq-body"><p><b>Причина:</b> Homebrew не подключён к терминалу (Mac на Apple Silicon).</p><p><b>Решение:</b> выполните пункт 3 шага 3 и перезапустите Терминал.</p></div>
+        </details>
+        <details data-only="mac">
+          <summary>Появилось окно «Установить инструменты командной строки»</summary>
+          <div class="faq-body"><p><b>Причина:</b> Homebrew нужны Command Line Tools от Apple.</p><p><b>Решение:</b> нажмите «Установить», дождитесь окончания (5–10 минут) и повторите команду установки Homebrew.</p></div>
+        </details>
+        <details data-only="mac">
+          <summary>macOS не даёт открыть Claude</summary>
+          <div class="faq-body"><p><b>Причина:</b> защита Gatekeeper при первом запуске.</p><p><b>Решение:</b> откройте «Системные настройки» → «Конфиденциальность и безопасность», внизу нажмите «Всё равно открыть». Скачивайте Claude только с <a href="https://claude.ai/download" target="_blank" rel="noopener">claude.ai/download</a>.</p></div>
+        </details>
+        <details data-only="mac">
+          <summary><code>python3.12</code> / <code>glab</code> не находится после установки</summary>
+          <div class="faq-body"><p><b>Решение:</b> закройте Терминал (<kbd>⌘</kbd>+<kbd>Q</kbd>) и откройте заново. Если не помогло — выполните пункт 3 шага 3 и проверьте снова.</p></div>
+        </details>
+        <details data-only="win">
+          <summary><code>winget</code> не распознан</summary>
+          <div class="faq-body"><p><b>Причина:</b> старая версия Windows или не установлен «App Installer».</p><p><b>Решение:</b> обновите Windows или установите «App Installer» из Microsoft Store.</p></div>
+        </details>
+        <details data-only="win">
+          <summary><code>glab</code> / <code>python</code> не распознаётся после установки</summary>
+          <div class="faq-body"><p><b>Причина:</b> не обновился PATH.</p><p><b>Решение:</b> закройте и снова откройте терминал; при необходимости выйдите из Windows и войдите снова.</p></div>
+        </details>
+        <details data-only="win">
+          <summary>Запрос согласия с условиями источника winget</summary>
+          <div class="faq-body"><p><b>Причина:</b> первый запуск winget.</p><p><b>Решение:</b> нажмите <code>Y</code> и повторите команду.</p></div>
+        </details>
+        <details data-only="win">
+          <summary>Claude Desktop не ставится или не открывается</summary>
+          <div class="faq-body"><p><b>Причина:</b> политики безопасности или антивирус.</p><p><b>Решение:</b> запустите установщик от имени администратора (правый клик → «Запуск от имени администратора»). Скачивайте только с <a href="https://claude.ai/download" target="_blank" rel="noopener">claude.ai/download</a>.</p></div>
+        </details>
+        <details>
+          <summary>Нет аккаунта на одном из сервисов</summary>
+          <div class="faq-body"><p><b>Решение:</b> зарегистрируйтесь по кнопке «Зарегистрироваться» на <a href="#accounts">шаге 1</a> — это бесплатно.</p></div>
+        </details>
+        <details>
+          <summary>Корпоративный прокси блокирует загрузку</summary>
+          <div class="faq-body"><p><b>Причина:</b> ограничения корпоративной сети.</p><p><b>Решение:</b> обратитесь в ИТ-поддержку для разблокировки доменов: <code>claude.ai</code>, <code>claude.com</code>, <code>github.com</code>, <code>gitlab.com</code>, <span data-only="win"><code>python.org</code> и источников winget/Microsoft</span><span data-only="mac"><code>brew.sh</code>, <code>raw.githubusercontent.com</code>, <code>ghcr.io</code></span>.</p></div>
+        </details>
+      </div>
+    </section>
+
+    <footer>
+      <div><b>Ведущий обучения:</b> Merei Zhumabekov<br>Вопросы по установке — подойдите к ведущему или напишите в чат группы.</div>
+      <div><b>ИТ-поддержка:</b> обратитесь в ИТ-отдел вашей организации<br>(права администратора, доступ к доменам, антивирус).</div>
+    </footer>
+
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var STORE_KEY = 'rpa-setup-checklist-v1';
+  var THEME_KEY = 'rpa-setup-theme';
+  var OS_KEY = 'rpa-setup-os';
+
+  function read(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function write(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
+
+  /* ---------- Toast ---------- */
+  var toast = document.getElementById('toast'), toastTimer;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 1800);
+  }
+
+  /* ---------- Copy ---------- */
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return fallbackCopy(text); });
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = document.getElementById(btn.getAttribute('data-copy')).textContent.trim();
+      var label = btn.querySelector('span');
+      copyText(text).then(function (ok) {
+        if (ok) {
+          btn.classList.add('done');
+          label.textContent = 'Скопировано';
+          showToast('Скопировано — вставьте в терминал');
+          setTimeout(function () { btn.classList.remove('done'); label.textContent = 'Копировать'; }, 2000);
+        } else {
+          showToast('Не удалось скопировать — выделите текст вручную');
+        }
+      });
+    });
+  });
+
+  /* ---------- OS switch (whole page) ---------- */
+  var osBtns = document.querySelectorAll('.os-btn');
+  function setOS(os, save) {
+    document.documentElement.setAttribute('data-os', os);
+    osBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.os === os)); });
+    if (save) write(OS_KEY, os);
+  }
+  osBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      setOS(b.dataset.os, true);
+      showToast(b.dataset.os === 'mac' ? 'Инструкция для macOS' : 'Инструкция для Windows');
+    });
+  });
+  var hashOS = (location.hash.match(/^#(win|mac)$/) || [])[1];
+  var savedOS = read(OS_KEY);
+  var ua = navigator.userAgentData && navigator.userAgentData.platform || navigator.platform || navigator.userAgent || '';
+  setOS(hashOS || (savedOS === 'mac' || savedOS === 'win' ? savedOS : (/Mac/i.test(ua) ? 'mac' : 'win')), false);
+
+  /* ---------- Checklist ---------- */
+  var boxes = document.querySelectorAll('#checklist input');
+  var total = boxes.length;
+  var state = {};
+  try { state = JSON.parse(read(STORE_KEY) || '{}') || {}; } catch (e) { state = {}; }
+
+  function render() {
+    var done = 0;
+    boxes.forEach(function (b) { if (b.checked) done++; });
+    var pct = (done / total * 100) + '%';
+    document.getElementById('count').textContent = done;
+    document.getElementById('sideCount').textContent = done + ' / ' + total;
+    document.getElementById('mainBar').style.width = pct;
+    document.getElementById('sideBar').style.width = pct;
+    document.getElementById('success').classList.toggle('show', done === total);
+  }
+  boxes.forEach(function (b) {
+    b.checked = !!state[b.dataset.id];
+    b.addEventListener('change', function () {
+      state[b.dataset.id] = b.checked;
+      write(STORE_KEY, JSON.stringify(state));
+      render();
+    });
+  });
+  document.getElementById('reset').addEventListener('click', function () {
+    boxes.forEach(function (b) { b.checked = false; });
+    state = {};
+    write(STORE_KEY, '{}');
+    render();
+  });
+  render();
+
+  /* ---------- Theme ---------- */
+  var themeBtn = document.getElementById('themeToggle');
+  var themes = ['auto', 'light', 'dark'];
+  var names = { auto: 'Тема: авто', light: 'Тема: светлая', dark: 'Тема: тёмная' };
+  function applyTheme(t) {
+    if (t === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', t);
+    themeBtn.textContent = names[t];
+  }
+  var theme = read(THEME_KEY);
+  if (themes.indexOf(theme) < 0) theme = 'auto';
+  applyTheme(theme);
+  themeBtn.addEventListener('click', function () {
+    theme = themes[(themes.indexOf(theme) + 1) % themes.length];
+    applyTheme(theme);
+    write(THEME_KEY, theme);
+  });
+
+  /* ---------- Active TOC ---------- */
+  var links = document.querySelectorAll('#toc a');
+  var map = {};
+  links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.remove('active'); });
+          var a = map[e.target.id];
+          if (a) a.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-30% 0px -60% 0px' });
+    document.querySelectorAll('main section[id]').forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
