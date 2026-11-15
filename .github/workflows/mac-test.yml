@@ -3,12 +3,16 @@
 name: mac-install-test
 on:
   workflow_dispatch:
+    inputs:
+      os:
+        description: 'JSON list of runners'
+        default: '["macos-15","macos-26","macos-15-intel"]'
 jobs:
   test:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, macos-26, macos-15-intel]
+        os: ${{ fromJSON(inputs.os) }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 50
     defaults:
@@ -33,6 +37,7 @@ jobs:
       - name: Make a clean Mac (remove Homebrew, reset shell profiles)
         run: |
           NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)" >/tmp/uninstall.log 2>&1; echo "uninstall exit=$?"; tail -3 /tmp/uninstall.log
+          ls -ld /usr/local /usr/local/* 2>/dev/null | head -20
           sudo rm -rf /opt/homebrew /usr/local/Homebrew /usr/local/Cellar /usr/local/Caskroom 2>/dev/null || true
           for f in .zprofile .zshrc .zshenv .zlogin .bash_profile .bashrc .profile; do [ -f ~/$f ] && mv ~/$f ~/$f.runner-bak; done
           echo "--- in a fresh Terminal now:"
@@ -48,13 +53,13 @@ jobs:
         run: |
           cat "$RUNNER_TEMP/mac-brew.sh"
           env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin NONINTERACTIVE=1 \
-            /bin/zsh -l -i "$RUNNER_TEMP/mac-brew.sh" > /tmp/brew-install.log 2>&1; echo "EXIT=$?"
+            /bin/zsh -l -i "$RUNNER_TEMP/mac-brew.sh" > /tmp/brew-install.log 2>&1 && echo "EXIT=0" || { echo "EXIT=$?"; tail -40 /tmp/brew-install.log; exit 1; }
           grep -E "Installation successful|Next steps|Run these|shellenv|Warning|Error|zprofile" /tmp/brew-install.log | head -20
 
       - name: "STEP 3.3 - connect Homebrew (site: Apple Silicon only)"
         run: |
           if [ "$(uname -m)" = "arm64" ]; then
-            env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/zsh -l -i "$RUNNER_TEMP/mac-path.sh"; echo "EXIT=$?"
+            env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/zsh -l -i "$RUNNER_TEMP/mac-path.sh" && echo "EXIT=0" || echo "EXIT=$?"
             echo "--- ~/.zprofile:"; cat ~/.zprofile
           else
             echo "Intel Mac: site says skip this step"
@@ -67,7 +72,7 @@ jobs:
         run: |
           cat "$RUNNER_TEMP/mac-install.sh"
           env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin HOMEBREW_NO_ENV_HINTS=1 \
-            /bin/zsh -l -i "$RUNNER_TEMP/mac-install.sh" > /tmp/tools.log 2>&1; echo "EXIT=$?"
+            /bin/zsh -l -i "$RUNNER_TEMP/mac-install.sh" > /tmp/tools.log 2>&1 && echo "EXIT=0" || echo "EXIT=$?"
           grep -E "^==> (Installing|Pouring|Summary|Caveats)|Error|Warning|already installed|Linking|keg-only" /tmp/tools.log | head -40
           tail -15 /tmp/tools.log
 
