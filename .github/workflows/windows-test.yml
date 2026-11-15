@@ -1,0 +1,100 @@
+name: windows-install-test
+# Проверка команд сайта на Windows. Запуск: вкладка Actions -> windows-install-test -> Run workflow
+# (или: gh workflow run windows-test.yml). Команды берутся прямо из index.html.
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-11-arm, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 50
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract commands from index.html (exactly as the site shows)
+        run: |
+          Add-Type -AssemblyName System.Web
+          $html = Get-Content index.html -Raw -Encoding UTF8
+          foreach ($id in 'win-install','win-check','gh-login','glab-login') {
+            $m = [regex]::Match($html, "<pre id=`"$id`">(.*?)</pre>", 'Singleline')
+            $txt = [System.Web.HttpUtility]::HtmlDecode(($m.Groups[1].Value -replace '<[^>]+>',''))
+            Set-Content -Path "$env:RUNNER_TEMP\$id.ps1" -Value $txt -Encoding UTF8
+            "===== $id"; $txt
+          }
+
+      - name: If winget is missing, apply the site's FAQ fix
+        run: |
+          if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+            "winget missing -> Add-AppxPackage -RegisterByFamilyName"
+            try { Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe -ErrorAction Stop; "registered" } catch { "FAILED: $_" }
+            $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')
+          }
+          "winget now: " + (Get-Command winget -ErrorAction SilentlyContinue).Source
+          winget --version 2>&1
+          exit 0
+
+      - name: Remove preinstalled tools to simulate a clean PC
+        continue-on-error: true
+        run: |
+          if (-not (Get-Command winget -ErrorAction SilentlyContinue)) { "no winget, skip"; exit 0 }
+          foreach ($id in 'Git.Git','GitHub.cli','OpenJS.NodeJS','OpenJS.NodeJS.LTS') {
+            "== uninstall $id"; winget uninstall -e --id $id --silent --disable-interactivity --accept-source-agreements 2>&1 | Select-Object -Last 2; "exit=$LASTEXITCODE"
+          }
+          $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')
+          foreach ($c in 'git','gh','glab','node') { "{0,-5} -> {1}" -f $c, ((Get-Command $c -ErrorAction SilentlyContinue).Source) }
+          exit 0
+
+      - name: STEP 3.1 - paste the install block
+        timeout-minutes: 35
+        run: |
+          if (-not (Get-Command winget -ErrorAction SilentlyContinue)) { "no winget on this image"; exit 0 }
+          $lines = Get-Content "$env:RUNNER_TEMP\win-install.ps1" | Where-Object { $_.Trim() }
+          foreach ($l in $lines) {
+            "################ $l"
+            Invoke-Expression $l 2>&1 | Where-Object { $_ -match '[A-Za-z]' } | ForEach-Object { ($_ -replace '[^\x20-\x7E]','').Trim() }
+            "RESULT: exit={0} hex=0x{0:X8}" -f $LASTEXITCODE
+          }
+          exit 0
+
+      - name: STEP 3.2 - new terminal + check block
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $fail = 0
+          $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')
+          $lines = Get-Content "$env:RUNNER_TEMP\win-check.ps1" | Where-Object { $_.Trim() }
+          foreach ($l in $lines) {
+            "################ $l"
+            $cmd = ($l -split ' ')[0]
+            "path: " + (Get-Command $cmd -ErrorAction SilentlyContinue).Source
+            if (-not (Get-Command $cmd -ErrorAction SilentlyContinue)) { "MISSING: $cmd"; $fail++ }
+            try { Invoke-Expression $l 2>&1 } catch { "ERROR: $_" }
+          }
+          "################ py -3.12 --version"; try { py -3.12 --version 2>&1 } catch { "ERROR: $_" }
+          exit $fail
+
+      - name: STEP 4 - login commands start correctly (stopped after 25s)
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')
+          $env:GH_TOKEN = $null; $env:GITHUB_TOKEN = $null; $env:CI = $null; $env:GITHUB_ACTIONS = $null
+          foreach ($f in 'gh-login','glab-login') {
+            $l = (Get-Content "$env:RUNNER_TEMP\$f.ps1" | Where-Object { $_.Trim() } | Select-Object -First 1)
+            "################ $l"
+            $exe, $rest = $l -split ' ', 2
+            if (-not (Get-Command $exe -ErrorAction SilentlyContinue)) { "no $exe"; continue }
+            $out = "$env:RUNNER_TEMP\$f.out"; $err = "$env:RUNNER_TEMP\$f.err"
+            $p = Start-Process -FilePath (Get-Command $exe).Source -ArgumentList $rest -RedirectStandardOutput $out -RedirectStandardError $err -PassThru -NoNewWindow
+            Start-Sleep 25
+            if (-not $p.HasExited) { "still running after 25s (waiting for browser) -> OK, stopping"; Stop-Process $p -Force } else { "exited with $($p.ExitCode)" }
+            "--- stdout"; Get-Content $out -ErrorAction SilentlyContinue
+            "--- stderr"; Get-Content $err -ErrorAction SilentlyContinue
+          }
+          "################ glab version / flag check"
+          glab --version
+          exit 0
