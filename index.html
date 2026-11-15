@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru" data-os="win">
+<html lang="ru" data-os="win" data-macpath="brew">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -243,7 +243,10 @@
   /* OS switch (global) */
   html[data-os="win"] [data-only="mac"],
   html[data-os="mac"] [data-only="win"] { display: none !important; }
-
+  html[data-macpath="brew"] [data-only-mac="pkg"], html[data-macpath="pkg"] [data-only-mac="brew"] { display: none !important; }
+  .mac-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin: 4px 0 6px; }
+  .mac-pick .os-btn { flex-direction: column; align-items: flex-start; gap: 0; text-align: left; line-height: 1.25; }
+  .mac-pick .os-btn small { font-weight: 400; font-size: 12px; opacity: .8; }
   .os-picker {
     margin-top: 28px; padding: 18px 20px; border-radius: var(--radius); background: var(--surface);
     border: 1px solid var(--border); box-shadow: var(--shadow);
@@ -478,20 +481,20 @@
           <div class="ic"><svg><use href="#i-os"/></svg></div>
           <div><h3>Операционная система</h3>
             <p data-only="win">Windows 10 (версия 1809+) или Windows 11, 64-bit. Команда <code>winget</code> уже встроена.</p>
-            <p data-only="mac">macOS 13 Ventura или новее, на Apple Silicon (M1–M4) или Intel. Программы ставятся через Homebrew.</p>
+            <p data-only="mac">macOS 13 Ventura или новее, Apple Silicon (M1–M4) или Intel. На Apple M1–M4 с macOS 15+ программы ставятся через Homebrew, на остальных Mac — официальными установщиками.</p>
           </div>
         </div>
         <div class="req">
           <div class="ic"><svg><use href="#i-shield"/></svg></div>
           <div><h3>Права администратора</h3>
             <p data-only="win">Желательны — для установки программ и корректного прописывания в PATH.</p>
-            <p data-only="mac">Нужен пароль от вашей учётной записи Mac: Homebrew попросит его при установке.</p>
+            <p data-only="mac">Нужен пароль от вашей учётной записи Mac и права администратора — Терминал попросит пароль при установке.</p>
           </div>
         </div>
         <div class="req">
           <div class="ic"><svg><use href="#i-globe"/></svg></div>
           <div><h3>Доступ в интернет</h3><p>Открыт доступ к доменам:</p>
-            <div class="domains"><code>claude.ai</code><code>claude.com</code><code>github.com</code><code>gitlab.com</code><code data-only="win">python.org</code><code data-only="win">winget</code><code data-only="mac">brew.sh</code><code data-only="mac">raw.githubusercontent.com</code><code data-only="mac">ghcr.io</code></div>
+            <div class="domains"><code>claude.ai</code><code>claude.com</code><code>github.com</code><code>gitlab.com</code><code data-only="win">python.org</code><code data-only="win">winget</code><code data-only="mac">brew.sh</code><code data-only="mac">raw.githubusercontent.com</code><code data-only="mac">ghcr.io</code><code data-only="mac">python.org</code><code data-only="mac">nodejs.org</code><code data-only="mac">pypi.org</code></div>
           </div>
         </div>
         <div class="req">
@@ -606,13 +609,26 @@
         <!-- macOS -->
         <div data-only="mac">
           <div class="substep" style="margin-top:0">
+            <h3>Какой у вас Mac?</h3>
+            <p>Меню Apple → «Об этом Mac»: строка «Чип» (Apple M…) или «Процессор» (Intel), ниже — версия macOS.</p>
+            <div class="mac-pick">
+              <div class="os-switch" role="group" aria-label="Тип Mac">
+                <button class="os-btn" type="button" data-macpath="brew" aria-pressed="true">Apple M1–M4<small>macOS 15 и новее</small></button>
+                <button class="os-btn" type="button" data-macpath="pkg" aria-pressed="false">Intel или macOS 13–14<small>официальные установщики</small></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Apple Silicon + macOS 15+: Homebrew -->
+          <div data-only-mac="brew">
+          <div class="substep">
             <h3>1. Откройте Терминал и проверьте Homebrew</h3>
             <p>Нажмите <kbd>⌘</kbd>+<kbd>Пробел</kbd>, введите «Терминал» и нажмите <kbd>Enter</kbd>. Затем выполните:</p>
             <div class="code">
               <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-brewcheck"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
 <pre id="mac-brewcheck"><span class="k">brew</span> --version</pre>
             </div>
-            <p>Показалась версия <code>Homebrew 4.x</code> — <b>сразу переходите к пункту 4</b>. Пишет <code>command not found</code> — сделайте пункты 2 и 3.</p>
+            <p>Показалась версия вида <code>Homebrew 7.x</code> — <b>сразу переходите к пункту 4</b>. Пишет <code>command not found</code> — сделайте пункты 2 и 3.</p>
           </div>
 
           <div class="substep">
@@ -627,7 +643,7 @@
 
           <div class="substep">
             <h3>3. Подключите Homebrew к терминалу</h3>
-            <p>Только для Mac на <b>Apple Silicon (M1–M4)</b>. На Intel-Mac этот пункт пропустите. Узнать процессор: меню Apple → «Об этом Mac» → строка «Чип» (Apple M…) или «Процессор» (Intel).</p>
+            <p>Чтобы команда <code>brew</code> работала в каждом новом окне Терминала:</p>
             <div class="code">
               <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-path"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
 <pre id="mac-path"><span class="k">echo</span> 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
@@ -641,10 +657,47 @@
               <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-install"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
 <pre id="mac-install"><span class="k">brew</span> install python@3.12 git gh glab node</pre>
             </div>
+            <p>Займёт 2–5 минут. Предупреждения (Warning) и подсказки в конце — это нормально.</p>
+          </div>
+          </div>
+
+          <!-- Intel or macOS 13–14: official installers -->
+          <div data-only-mac="pkg">
+          <div class="substep">
+            <h3>1. Установите Git (Command Line Tools от Apple)</h3>
+            <p>Нажмите <kbd>⌘</kbd>+<kbd>Пробел</kbd>, введите «Терминал» и нажмите <kbd>Enter</kbd>. Затем выполните:</p>
+            <div class="code">
+              <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-clt"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
+<pre id="mac-clt"><span class="k">xcode-select</span> --install</pre>
+            </div>
+            <p>Появится окно — нажмите <b>«Установить»</b> и дождитесь окончания (5–10 минут). Если Терминал пишет <code>already installed</code> — всё уже есть, идите дальше.</p>
           </div>
 
           <div class="substep">
-            <h3>5. Перезапустите терминал и проверьте</h3>
+            <h3>2. Скачайте и установите Python, Node.js, GitHub CLI и GitLab CLI</h3>
+            <p>Одна вставка: скачивает официальные установщики с python.org, nodejs.org, GitHub и GitLab и устанавливает их.</p>
+            <div class="code">
+              <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-pkg"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
+<pre id="mac-pkg">{
+<span class="k">cd</span> ~/Downloads
+<span class="k">curl</span> -fLO https://www.python.org/ftp/python/3.12.10/python-3.12.10-macos11.pkg
+<span class="k">curl</span> -fLO https://nodejs.org/dist/v26.13.1/node-v26.13.1.pkg
+<span class="k">curl</span> -fLO https://github.com/cli/cli/releases/download/v2.104.0/gh_2.104.0_macOS_universal.pkg
+<span class="k">curl</span> -fLO https://gitlab.com/gitlab-org/cli/-/releases/v1.130.0/downloads/glab_1.130.0_darwin_$(uname -m | sed s/x86_64/amd64/).tar.gz
+<span class="k">sudo</span> installer -pkg python-3.12.10-macos11.pkg -target /
+<span class="k">sudo</span> installer -pkg node-v26.13.1.pkg -target /
+<span class="k">sudo</span> installer -pkg gh_2.104.0_macOS_universal.pkg -target /
+<span class="k">sudo</span> mkdir -p /usr/local/bin
+<span class="k">sudo</span> tar -xzf glab_1.130.0_darwin_*.tar.gz -C /usr/local bin/glab
+<span class="k">"/Applications/Python 3.12/Install Certificates.command"</span>
+}</pre>
+            </div>
+            <div class="note info" style="margin-top:0"><svg><use href="#i-info"/></svg><div>После загрузки Терминал попросит <b>пароль от Mac</b>: при вводе символы не отображаются — введите и нажмите <kbd>Enter</kbd>. Установка займёт 2–4 минуты, в конце появятся строки <code>The install was successful</code>.</div></div>
+          </div>
+          </div>
+
+          <div class="substep">
+            <h3><span data-only-mac="brew">5</span><span data-only-mac="pkg">3</span>. Перезапустите терминал и проверьте</h3>
             <p><b>Закройте окно Терминала</b> (<kbd>⌘</kbd>+<kbd>Q</kbd>) и откройте заново. Затем выполните:</p>
             <div class="code">
               <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-check"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
@@ -667,7 +720,7 @@
             <div><span class="app sm glab"><svg><use href="#l-gitlab"/></svg></span><div><b>glab</b><span>glab 1.x</span></div></div>
             <div><span class="app sm node"><svg><use href="#l-node"/></svg></span><div><b>node</b><span>v22.x или новее</span></div></div>
           </div>
-          <div class="note info"><svg><use href="#i-info"/></svg><div data-only="win">Команда «не распознаётся»? Перезапустите терминал ещё раз или выйдите из Windows и войдите снова.</div><div data-only="mac">Пишет <code>command not found</code>? Перезапустите Терминал. Если не помогло — выполните пункт 3 и повторите проверку.</div></div>
+          <div class="note info"><svg><use href="#i-info"/></svg><div data-only="win">Команда «не распознаётся»? Перезапустите терминал ещё раз или выйдите из Windows и войдите снова.</div><div data-only="mac">Пишет <code>command not found</code>? Закройте Терминал (<kbd>⌘</kbd>+<kbd>Q</kbd>) и откройте заново. <span data-only-mac="brew">Не помогло — выполните пункт 3 и повторите проверку.</span><span data-only-mac="pkg">Не помогло — посмотрите, нет ли ошибок в выводе пункта 2, и повторите его.</span></div></div>
         </div>
       </div>
     </section>
@@ -737,6 +790,22 @@
       <p class="sec-sub">Типовые проблемы и их решения. Нажмите на симптом, чтобы раскрыть.</p>
       <div class="faq">
         <details data-only="mac">
+          <summary>«Homebrew on macOS is only supported on Apple Silicon processors!»</summary>
+          <div class="faq-body"><p><b>Причина:</b> у вас Mac на процессоре Intel — Homebrew на нём больше не устанавливается.</p><p><b>Решение:</b> в шаге 3 выберите «Intel или macOS 13–14» и следуйте той инструкции.</p></div>
+        </details>
+        <details data-only="mac">
+          <summary>Homebrew пишет «You are using macOS 13/14… not provide support»</summary>
+          <div class="faq-body"><p><b>Причина:</b> Homebrew поддерживает только macOS 15 и новее; на старой версии программы могут собираться из исходников очень долго.</p><p><b>Решение:</b> прервите установку (<kbd>Ctrl</kbd>+<kbd>C</kbd>) и выберите в шаге 3 «Intel или macOS 13–14». Или обновите macOS.</p></div>
+        </details>
+        <details data-only="mac">
+          <summary><code>curl: (6) Could not resolve host</code> или <code>(22) … 404</code> при скачивании</summary>
+          <div class="faq-body"><p><b>Причина:</b> нет доступа к сайту загрузки (прокси, VPN) или файл переехал.</p><p><b>Решение:</b> проверьте интернет и доступ к доменам из шага 0. Если ошибка 404 — сообщите ведущему.</p></div>
+        </details>
+        <details data-only="mac">
+          <summary><code>Sorry, try again</code> / <code>is not in the sudoers file</code></summary>
+          <div class="faq-body"><p><b>Причина:</b> неверный пароль — или у учётной записи нет прав администратора.</p><p><b>Решение:</b> введите пароль, которым входите в Mac. Если пишет <code>not in the sudoers file</code> — нужны права администратора, обратитесь в ИТ.</p></div>
+        </details>
+        <details data-only="mac">
           <summary><code>brew: command not found</code> после установки Homebrew</summary>
           <div class="faq-body"><p><b>Причина:</b> Homebrew не подключён к терминалу (Mac на Apple Silicon).</p><p><b>Решение:</b> выполните пункт 3 шага 3 и перезапустите Терминал.</p></div>
         </details>
@@ -750,7 +819,7 @@
         </details>
         <details data-only="mac">
           <summary><code>python3.12</code> / <code>gh</code> / <code>glab</code> не находится после установки</summary>
-          <div class="faq-body"><p><b>Решение:</b> закройте Терминал (<kbd>⌘</kbd>+<kbd>Q</kbd>) и откройте заново. Если не помогло — выполните пункт 3 шага 3 и проверьте снова.</p></div>
+          <div class="faq-body"><p><b>Решение:</b> закройте Терминал (<kbd>⌘</kbd>+<kbd>Q</kbd>) и откройте заново. Если не помогло: на пути Homebrew — выполните пункт 3 шага 3, на пути с установщиками — повторите пункт 2 и посмотрите на ошибки.</p></div>
         </details>
         <details data-only="win">
           <summary><code>winget</code> не распознан</summary>
@@ -790,7 +859,7 @@
         </details>
         <details>
           <summary>Корпоративный прокси блокирует загрузку</summary>
-          <div class="faq-body"><p><b>Причина:</b> ограничения корпоративной сети.</p><p><b>Решение:</b> обратитесь в ИТ-поддержку для разблокировки доменов: <code>claude.ai</code>, <code>claude.com</code>, <code>github.com</code>, <code>gitlab.com</code>, <span data-only="win"><code>python.org</code> и источников winget/Microsoft</span><span data-only="mac"><code>brew.sh</code>, <code>raw.githubusercontent.com</code>, <code>ghcr.io</code></span>.</p></div>
+          <div class="faq-body"><p><b>Причина:</b> ограничения корпоративной сети.</p><p><b>Решение:</b> обратитесь в ИТ-поддержку для разблокировки доменов: <code>claude.ai</code>, <code>claude.com</code>, <code>github.com</code>, <code>gitlab.com</code>, <span data-only="win"><code>python.org</code> и источников winget/Microsoft</span><span data-only="mac"><code>brew.sh</code>, <code>raw.githubusercontent.com</code>, <code>ghcr.io</code>, <code>python.org</code>, <code>nodejs.org</code>, <code>pypi.org</code></span>.</p></div>
         </details>
       </div>
     </section>
@@ -860,7 +929,7 @@
   });
 
   /* ---------- OS switch (whole page) ---------- */
-  var osBtns = document.querySelectorAll('.os-btn');
+  var osBtns = document.querySelectorAll('.os-btn[data-os]');
   function setOS(os, save) {
     document.documentElement.setAttribute('data-os', os);
     osBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.os === os)); });
@@ -876,6 +945,20 @@
   var savedOS = read(OS_KEY);
   var ua = navigator.userAgentData && navigator.userAgentData.platform || navigator.platform || navigator.userAgent || '';
   setOS(hashOS || (savedOS === 'mac' || savedOS === 'win' ? savedOS : (/Mac/i.test(ua) ? 'mac' : 'win')), false);
+
+  /* ---------- Mac path (Homebrew vs official installers) ---------- */
+  var MACPATH_KEY = 'rpa-setup-macpath';
+  var macBtns = document.querySelectorAll('.os-btn[data-macpath]');
+  function setMacPath(p, save) {
+    document.documentElement.setAttribute('data-macpath', p);
+    macBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.macpath === p)); });
+    if (save) write(MACPATH_KEY, p);
+  }
+  macBtns.forEach(function (b) {
+    b.addEventListener('click', function () { setMacPath(b.dataset.macpath, true); });
+  });
+  var savedMac = read(MACPATH_KEY);
+  setMacPath(savedMac === 'pkg' ? 'pkg' : 'brew', false);
 
   /* ---------- Checklist ---------- */
   var boxes = document.querySelectorAll('#checklist input');

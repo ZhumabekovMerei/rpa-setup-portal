@@ -1,23 +1,28 @@
 # Проверка команд сайта на macOS. Запуск: вкладка Actions -> mac-install-test -> Run workflow
 # (или: gh workflow run mac-test.yml). Команды берутся прямо из index.html.
+# path=brew — путь «Apple M1–M4, macOS 15+» (Homebrew); path=pkg — «Intel или macOS 13–14» (официальные установщики).
 name: mac-install-test
 on:
   workflow_dispatch:
     inputs:
-      os:
-        description: 'JSON list of runners'
-        default: '["macos-15","macos-26","macos-15-intel"]'
+      matrix:
+        description: 'JSON list of {os, path}'
+        default: '[{"os":"macos-15","path":"brew"},{"os":"macos-26","path":"brew"},{"os":"macos-15-intel","path":"pkg"},{"os":"macos-15","path":"pkg"},{"os":"macos-14","path":"brew"}]'
 jobs:
   test:
+    name: ${{ matrix.os }} / ${{ matrix.path }}
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(inputs.os) }}
+        include: ${{ fromJSON(inputs.matrix) }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 50
     defaults:
       run:
         shell: bash
+    env:
+      # «новое окно Терминала» у чистого пользователя
+      FRESH: env -i HOME=/Users/runner USER=runner TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin
     steps:
       - uses: actions/checkout@v4
 
@@ -26,7 +31,7 @@ jobs:
           /usr/bin/python3 - <<'PY'
           import re, html, os
           s = open('index.html', encoding='utf-8').read()
-          for id in ['mac-brewcheck','mac-brew','mac-path','mac-install','mac-check','gh-login','glab-login']:
+          for id in ['mac-brewcheck','mac-brew','mac-path','mac-install','mac-clt','mac-pkg','mac-check','gh-login','glab-login']:
               m = re.search(r'<pre id="%s">(.*?)</pre>' % id, s, re.S)
               txt = html.unescape(re.sub(r'<[^>]+>', '', m.group(1)))
               open(os.path.join(os.environ['RUNNER_TEMP'], id + '.sh'), 'w').write(txt + '\n')
@@ -34,59 +39,80 @@ jobs:
           PY
           uname -m; sw_vers
 
-      - name: Make a clean Mac (remove Homebrew, reset shell profiles)
+      - name: Make a clean Mac (remove Homebrew, python.org Python, Node, gh; reset shell profiles)
         run: |
-          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)" >/tmp/uninstall.log 2>&1; echo "uninstall exit=$?"; tail -3 /tmp/uninstall.log
-          ls -ld /usr/local /usr/local/* 2>/dev/null | head -20
-          sudo rm -rf /opt/homebrew /usr/local/Homebrew /usr/local/Cellar /usr/local/Caskroom 2>/dev/null || true
+          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)" >/tmp/uninstall.log 2>&1 && echo "brew uninstall ok" || echo "brew uninstall exit=$?"
+          sudo rm -rf /opt/homebrew /usr/local/Homebrew /usr/local/Cellar /usr/local/Caskroom
+          sudo rm -rf /Library/Frameworks/Python.framework/Versions/3.12 "/Applications/Python 3.12"
+          sudo rm -f /usr/local/bin/python3.12* /usr/local/bin/pip3.12 /usr/local/bin/node /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/gh /usr/local/bin/glab
           for f in .zprofile .zshrc .zshenv .zlogin .bash_profile .bashrc .profile; do [ -f ~/$f ] && mv ~/$f ~/$f.runner-bak; done
           echo "--- in a fresh Terminal now:"
-          env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/zsh -l -i -c 'for c in brew python3.12 git gh glab node; do printf "%-10s -> %s\n" $c "$(whence -p $c)"; done' 2>&1 | grep -- '->'
+          $FRESH /bin/zsh -l -i -c 'for c in brew python3.12 git gh glab node; do printf "%-10s -> %s\n" $c "$(whence -p $c)"; done' 2>&1 | grep -- '->'
+          xcode-select -p || true
 
-      - name: "STEP 3.1 - brew --version (expect: command not found)"
+      # ---------------- path: brew ----------------
+      - name: "[brew] 1. brew --version (expect: command not found)"
+        if: matrix.path == 'brew'
         run: |
-          env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/zsh -l -i "$RUNNER_TEMP/mac-brewcheck.sh" 2>&1 | tail -3 || true
-          exit 0
+          $FRESH /bin/zsh -l -i "$RUNNER_TEMP/mac-brewcheck.sh" 2>&1 | tail -3 || true
 
-      - name: "STEP 3.2 - install Homebrew (site command; NONINTERACTIVE replaces pressing Enter)"
+      - name: "[brew] 2. install Homebrew (site command; NONINTERACTIVE replaces pressing Enter)"
+        if: matrix.path == 'brew'
         timeout-minutes: 20
         run: |
-          cat "$RUNNER_TEMP/mac-brew.sh"
-          env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin NONINTERACTIVE=1 \
-            /bin/zsh -l -i "$RUNNER_TEMP/mac-brew.sh" > /tmp/brew-install.log 2>&1 && echo "EXIT=0" || { echo "EXIT=$?"; tail -40 /tmp/brew-install.log; exit 1; }
-          grep -E "Installation successful|Next steps|Run these|shellenv|Warning|Error|zprofile" /tmp/brew-install.log | head -20
+          $FRESH NONINTERACTIVE=1 /bin/zsh -l -i "$RUNNER_TEMP/mac-brew.sh" > /tmp/brew-install.log 2>&1 && echo "EXIT=0" || { echo "EXIT=$?"; tail -40 /tmp/brew-install.log; exit 1; }
+          grep -E "Installation successful|You are using macOS|do not provide support|Warning|Error" /tmp/brew-install.log | head -20
 
-      - name: "STEP 3.3 - connect Homebrew (site: Apple Silicon only)"
+      - name: "[brew] 3. connect Homebrew"
+        if: matrix.path == 'brew'
         run: |
-          if [ "$(uname -m)" = "arm64" ]; then
-            env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/zsh -l -i "$RUNNER_TEMP/mac-path.sh" && echo "EXIT=0" || echo "EXIT=$?"
-            echo "--- ~/.zprofile:"; cat ~/.zprofile
-          else
-            echo "Intel Mac: site says skip this step"
-          fi
-          echo "--- brew in a NEW Terminal:"
-          env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/zsh -l -i -c 'whence -p brew; brew --version' 2>&1 | tail -3
+          $FRESH /bin/zsh -l -i "$RUNNER_TEMP/mac-path.sh" && echo "EXIT=0" || echo "EXIT=$?"
+          echo "--- ~/.zprofile:"; cat ~/.zprofile
+          echo "--- brew in a NEW Terminal:"; $FRESH /bin/zsh -l -i -c 'whence -p brew; brew --version' 2>&1 | tail -3
 
-      - name: "STEP 3.4 - install all tools (site command)"
-        timeout-minutes: 30
+      - name: "[brew] 4. install all tools (site command)"
+        if: matrix.path == 'brew'
+        timeout-minutes: 40
         run: |
-          cat "$RUNNER_TEMP/mac-install.sh"
-          env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin HOMEBREW_NO_ENV_HINTS=1 \
-            /bin/zsh -l -i "$RUNNER_TEMP/mac-install.sh" > /tmp/tools.log 2>&1 && echo "EXIT=0" || echo "EXIT=$?"
-          grep -E "^==> (Installing|Pouring|Summary|Caveats)|Error|Warning|already installed|Linking|keg-only" /tmp/tools.log | head -40
-          tail -15 /tmp/tools.log
+          start=$(date +%s)
+          $FRESH HOMEBREW_NO_ENV_HINTS=1 /bin/zsh -l -i "$RUNNER_TEMP/mac-install.sh" > /tmp/tools.log 2>&1 && echo "EXIT=0" || echo "EXIT=$?"
+          echo "took $(( $(date +%s) - start )) s"
+          grep -c "Pouring" /tmp/tools.log | sed 's/^/bottles poured: /'
+          grep -E "Building from source|from source|Error|Warning" /tmp/tools.log | head -20
+          tail -8 /tmp/tools.log
 
-      - name: "STEP 3.5 - new Terminal + check block"
+      # ---------------- path: pkg ----------------
+      - name: "[pkg] 1. xcode-select --install (CLT already present on runner)"
+        if: matrix.path == 'pkg'
+        run: |
+          $FRESH /bin/zsh -l -i "$RUNNER_TEMP/mac-clt.sh" 2>&1 | tail -3 || true
+
+      - name: "[pkg] 2. paste the installers block (site command)"
+        if: matrix.path == 'pkg'
+        timeout-minutes: 25
+        run: |
+          start=$(date +%s)
+          $FRESH /bin/zsh -l -i "$RUNNER_TEMP/mac-pkg.sh" > /tmp/pkg.log 2>&1 && echo "EXIT=0" || echo "EXIT=$?"
+          echo "took $(( $(date +%s) - start )) s"
+          grep -v -E "^\s*[#0-9. %]+$|^ *%|Dload|^\s*$" /tmp/pkg.log | tail -40
+
+      # ---------------- common ----------------
+      - name: "Check block in a NEW Terminal + HTTPS from Python"
         run: |
           fail=0
           while IFS= read -r l; do
             [ -z "$l" ] && continue
             c=${l%% *}
             echo "################ $l"
-            out=$(env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/zsh -l -i -c "whence -p $c; $l" 2>&1)
+            out=$($FRESH /bin/zsh -l -i -c "whence -p $c; $l" 2>&1)
             echo "$out"
             echo "$out" | grep -qiE "command not found|no such file" && { echo "MISSING: $c"; fail=$((fail+1)); }
           done < "$RUNNER_TEMP/mac-check.sh"
+          echo "################ python3.12 HTTPS (certificates)"
+          $FRESH /bin/zsh -l -i -c "python3.12 -c \"import urllib.request; print('HTTPS ok', urllib.request.urlopen('https://pypi.org/simple/requests/').status)\"" 2>&1 | tail -2 | tee /tmp/https.txt
+          grep -q "HTTPS ok 200" /tmp/https.txt || { echo "HTTPS FAILED"; fail=$((fail+1)); }
+          echo "################ pip"
+          $FRESH /bin/zsh -l -i -c "python3.12 -m pip --version" 2>&1 | tail -1
           exit $fail
 
       - name: "STEP 4 - login commands start correctly (stopped after 25s)"
@@ -94,8 +120,7 @@ jobs:
           for f in gh-login glab-login; do
             l=$(head -1 "$RUNNER_TEMP/$f.sh")
             echo "################ $l"
-            env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin BROWSER=echo \
-              /bin/zsh -l -c "$l" > "/tmp/$f.out" 2>&1 < /dev/null &
+            $FRESH BROWSER=echo /bin/zsh -l -c "$l" > "/tmp/$f.out" 2>&1 < /dev/null &
             pid=$!; sleep 25
             if kill -0 $pid 2>/dev/null; then echo "still running after 25s (waiting for browser) -> OK"; kill $pid; else wait $pid; echo "exited with $?"; fi
             cat "/tmp/$f.out"
