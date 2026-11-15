@@ -185,6 +185,7 @@
   .app.github  { background: #181717; color: #fff; }
   .app.gitlab  { background: #fc6d26; color: #fff; }
   .app.glab    { background: #171321; color: #fc6d26; }
+  .app.ghcli   { background: #181717; color: #fff; }
   .app.python  { background: #3776ab; color: #ffd43b; }
   .app.git     { background: #f05032; color: #fff; }
   .app.node    { background: #5fa04e; color: #fff; }
@@ -197,7 +198,7 @@
   .stack { display: flex; flex-wrap: wrap; gap: 14px 18px; margin-top: 28px; }
   .stack-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); width: 76px; text-align: center; line-height: 1.25; }
 
-  .tools-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 20px; }
+  .tools-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 12px; margin-bottom: 20px; }
   .tool { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); min-width: 0; }
   .tool b { display: block; font-size: 15px; }
   .tool span { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.35; }
@@ -291,9 +292,10 @@
 
   .substep { margin-top: 26px; }
   .substep h3 { font-size: 17px; margin: 0 0 4px; }
+  .substep h3.with-icon { display: flex; align-items: center; gap: 10px; }
   .substep p { margin: 0 0 6px; color: var(--muted); }
 
-  .expect { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-top: 4px; }
+  .expect { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; margin-top: 4px; }
   .expect > div { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; display: flex; align-items: center; gap: 10px; min-width: 0; }
   .expect b { display: block; font-family: ui-monospace, Consolas, Menlo, monospace; font-size: 13px; }
   .expect span { color: var(--muted); }
@@ -420,7 +422,7 @@
       <li><a href="#accounts"><span class="n">1</span>Аккаунты</a></li>
       <li><a href="#desktop"><span class="n">2</span>Claude Desktop</a></li>
       <li><a href="#cli"><span class="n">3</span>Инструменты</a></li>
-      <li><a href="#glab"><span class="n">4</span>GitLab CLI</a></li>
+      <li><a href="#glab"><span class="n">4</span>Вход в CLI</a></li>
       <li><a href="#check"><span class="n">✓</span>Проверь себя</a></li>
       <li><a href="#help"><span class="n">?</span>Если не работает</a></li>
     </ul>
@@ -429,7 +431,7 @@
       <button class="os-btn" type="button" data-os="mac" aria-pressed="false"><svg><use href="#l-apple"/></svg>macOS</button>
     </div>
     <div class="progress-card">
-      <div class="row"><span>Готовность</span><strong id="sideCount">0 / 9</strong></div>
+      <div class="row"><span>Готовность</span><strong id="sideCount">0 / 11</strong></div>
       <div class="bar"><span id="sideBar"></span></div>
     </div>
     <button class="theme-toggle" id="themeToggle" type="button">Тема: авто</button>
@@ -445,7 +447,7 @@
         <span class="chip accent"><svg><use href="#i-clock"/></svg>Займёт ~10 минут</span>
         <span class="chip" data-only="win"><svg><use href="#l-windows"/></svg>Windows 10 / 11</span>
         <span class="chip" data-only="mac"><svg><use href="#l-apple"/></svg>macOS</span>
-        <span class="chip"><svg><use href="#i-user"/></svg>3 аккаунта · 5 программ</span>
+        <span class="chip"><svg><use href="#i-user"/></svg>3 аккаунта · 6 программ</span>
       </div>
       <div class="stack" aria-label="Что понадобится">
         <div class="stack-item"><span class="app claude"><svg><use href="#l-claude"/></svg></span>Claude</div>
@@ -454,6 +456,7 @@
         <div class="stack-item"><span class="app desktop"><svg><use href="#l-claude"/></svg></span>Claude Desktop</div>
         <div class="stack-item"><span class="app python"><svg><use href="#l-python"/></svg></span>Python 3.12</div>
         <div class="stack-item"><span class="app git"><svg><use href="#l-git"/></svg></span>Git</div>
+        <div class="stack-item"><span class="app ghcli"><svg><use href="#l-github"/></svg><span class="badge"><svg><use href="#l-terminal"/></svg></span></span>GitHub CLI</div>
         <div class="stack-item"><span class="app glab"><svg><use href="#l-gitlab"/></svg><span class="badge"><svg><use href="#l-terminal"/></svg></span></span>GitLab CLI</div>
         <div class="stack-item"><span class="app node"><svg><use href="#l-node"/></svg></span>Node.js</div>
       </div>
@@ -514,7 +517,7 @@
         </div>
         <div class="card acc">
           <div class="acc-top"><span class="app github"><svg><use href="#l-github"/></svg></span><h3>GitHub</h3></div>
-          <p class="why">Хранение кода роботов и работа с репозиториями.</p>
+          <p class="why">Хранение кода роботов и работа с репозиториями. Нужен для GitHub CLI (<code>gh</code>) на шаге 4.</p>
           <div class="btn-row">
             <a class="btn btn-primary" href="https://github.com/login" target="_blank" rel="noopener">Войти</a>
             <a class="btn btn-ghost" href="https://github.com/signup" target="_blank" rel="noopener">Зарегистрироваться</a>
@@ -559,11 +562,12 @@
     <!-- 3. CLI -->
     <section id="cli">
       <div class="sec-head"><span class="sec-num">ШАГ 3</span><h2>Инструменты командной строки</h2><span class="time">≈ 5 мин</span></div>
-      <p class="sec-sub">Python 3.12, Git, GitLab CLI и Node.js (нужен для MCP-серверов Claude) ставятся <span data-only="win">одним блоком команд через <code>winget</code></span><span data-only="mac">парой команд через Homebrew</span>.</p>
+      <p class="sec-sub">Python 3.12, Git, GitHub CLI, GitLab CLI и Node.js (нужен для MCP-серверов Claude) ставятся <span data-only="win">одним блоком команд через <code>winget</code></span><span data-only="mac">парой команд через Homebrew</span>.</p>
 
       <div class="tools-grid">
         <div class="tool"><span class="app python"><svg><use href="#l-python"/></svg></span><div><b>Python 3.12</b><span>Язык для роботов</span></div></div>
         <div class="tool"><span class="app git"><svg><use href="#l-git"/></svg></span><div><b>Git</b><span>Контроль версий</span></div></div>
+        <div class="tool"><span class="app ghcli"><svg><use href="#l-github"/></svg><span class="badge"><svg><use href="#l-terminal"/></svg></span></span><div><b>GitHub CLI</b><span>Команда <code>gh</code></span></div></div>
         <div class="tool"><span class="app glab"><svg><use href="#l-gitlab"/></svg><span class="badge"><svg><use href="#l-terminal"/></svg></span></span><div><b>GitLab CLI</b><span>Команда <code>glab</code></span></div></div>
         <div class="tool"><span class="app node"><svg><use href="#l-node"/></svg></span><div><b>Node.js LTS</b><span>Для MCP-серверов</span></div></div>
       </div>
@@ -578,6 +582,7 @@
               <div class="code-head"><span>PowerShell</span><button class="copy" type="button" data-copy="win-install"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
 <pre id="win-install"><span class="k">winget</span> install -e --id Python.Python.3.12
 <span class="k">winget</span> install -e --id Git.Git
+<span class="k">winget</span> install -e --id GitHub.cli
 <span class="k">winget</span> install -e --id glab.glab
 <span class="k">winget</span> install -e --id OpenJS.NodeJS.LTS</pre>
             </div>
@@ -591,6 +596,7 @@
               <div class="code-head"><span>PowerShell</span><button class="copy" type="button" data-copy="win-check"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
 <pre id="win-check"><span class="k">python</span> --version
 <span class="k">git</span> --version
+<span class="k">gh</span> --version
 <span class="k">glab</span> --version
 <span class="k">node</span> --version</pre>
             </div>
@@ -633,7 +639,7 @@
             <h3>4. Установите все инструменты одной командой</h3>
             <div class="code">
               <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-install"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
-<pre id="mac-install"><span class="k">brew</span> install python@3.12 git glab node</pre>
+<pre id="mac-install"><span class="k">brew</span> install python@3.12 git gh glab node</pre>
             </div>
           </div>
 
@@ -644,6 +650,7 @@
               <div class="code-head"><span>Терминал</span><button class="copy" type="button" data-copy="mac-check"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
 <pre id="mac-check"><span class="k">python3.12</span> --version
 <span class="k">git</span> --version
+<span class="k">gh</span> --version
 <span class="k">glab</span> --version
 <span class="k">node</span> --version</pre>
             </div>
@@ -656,6 +663,7 @@
           <div class="expect">
             <div><span class="app sm python"><svg><use href="#l-python"/></svg></span><div><b data-only="win">python</b><b data-only="mac">python3.12</b><span>Python 3.12.x</span></div></div>
             <div><span class="app sm git"><svg><use href="#l-git"/></svg></span><div><b>git</b><span>git version 2.x</span></div></div>
+            <div><span class="app sm ghcli"><svg><use href="#l-github"/></svg></span><div><b>gh</b><span>gh version 2.x</span></div></div>
             <div><span class="app sm glab"><svg><use href="#l-gitlab"/></svg></span><div><b>glab</b><span>glab 1.x</span></div></div>
             <div><span class="app sm node"><svg><use href="#l-node"/></svg></span><div><b>node</b><span>v22.x или новее</span></div></div>
           </div>
@@ -664,20 +672,36 @@
       </div>
     </section>
 
-    <!-- 4. glab -->
+    <!-- 4. gh + glab -->
     <section id="glab">
-      <div class="sec-head"><span class="sec-num">ШАГ 4</span><h2>Привязка GitLab CLI</h2><span class="time">≈ 1 мин</span></div>
-      <p class="sec-sub">Свяжите <code>glab</code> со своим аккаунтом GitLab из шага 1.</p>
+      <div class="sec-head"><span class="sec-num">ШАГ 4</span><h2>Вход в GitHub CLI и GitLab CLI</h2><span class="time">≈ 2 мин</span></div>
+      <p class="sec-sub">Свяжите <code>gh</code> и <code>glab</code> со своими аккаунтами GitHub и GitLab из шага 1.</p>
       <div class="card">
-        <div class="code" style="margin-top:0">
-          <div class="code-head"><span data-only="win">PowerShell</span><span data-only="mac">Терминал</span><button class="copy" type="button" data-copy="glab-login"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
-<pre id="glab-login"><span class="k">glab</span> auth login</pre>
+        <div class="substep" style="margin-top:0">
+          <h3 class="with-icon"><span class="app xs ghcli"><svg><use href="#l-github"/></svg></span>1. GitHub CLI</h3>
+          <div class="code">
+            <div class="code-head"><span data-only="win">PowerShell</span><span data-only="mac">Терминал</span><button class="copy" type="button" data-copy="gh-login"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
+<pre id="gh-login"><span class="k">gh</span> auth login</pre>
+          </div>
+          <ol class="steps" style="margin-top:16px">
+            <li><div>Где используете GitHub — выберите <code>GitHub.com</code>.</div></li>
+            <li><div>Протокол — <code>HTTPS</code>. На вопрос «Authenticate Git with your GitHub credentials?» нажмите <code>Y</code>.</div></li>
+            <li><div>Способ входа — <b>Login with a web browser</b>. Терминал покажет <b>одноразовый код</b> вида <code>ABCD-1234</code>: запомните его и нажмите <kbd>Enter</kbd>.</div></li>
+            <li><div>В браузере войдите в <b>тот же аккаунт GitHub</b>, введите код и нажмите «Authorize». В терминале появится <code>✓ Logged in as …</code>.</div></li>
+          </ol>
         </div>
-        <ol class="steps" style="margin-top:16px">
-          <li><div>На вопрос о сервере выберите <code>gitlab.com</code>.</div></li>
-          <li><div>Способ входа — <b>через браузер</b> (Web).</div></li>
-          <li><div>В открывшемся окне войдите в <b>тот же аккаунт GitLab</b> и подтвердите доступ. В терминале появится сообщение об успешном входе.</div></li>
-        </ol>
+        <div class="substep">
+          <h3 class="with-icon"><span class="app xs glab"><svg><use href="#l-gitlab"/></svg></span>2. GitLab CLI</h3>
+          <div class="code">
+            <div class="code-head"><span data-only="win">PowerShell</span><span data-only="mac">Терминал</span><button class="copy" type="button" data-copy="glab-login"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
+<pre id="glab-login"><span class="k">glab</span> auth login</pre>
+          </div>
+          <ol class="steps" style="margin-top:16px">
+            <li><div>На вопрос о сервере выберите <code>gitlab.com</code>.</div></li>
+            <li><div>Способ входа — <b>через браузер</b> (Web).</div></li>
+            <li><div>В открывшемся окне войдите в <b>тот же аккаунт GitLab</b> и подтвердите доступ. В терминале появится сообщение об успешном входе.</div></li>
+          </ol>
+        </div>
       </div>
     </section>
 
@@ -687,7 +711,7 @@
       <p class="sec-sub">Отметьте каждый пункт. Отметки хранятся только в вашем браузере — никакие данные не собираются.</p>
       <div class="card">
         <div class="check-head">
-          <div class="check-count"><strong id="count">0</strong> из 9 готово</div>
+          <div class="check-count"><strong id="count">0</strong> из 11 готово</div>
           <button class="btn btn-ghost" type="button" id="reset">Сбросить</button>
         </div>
         <div class="bar" style="margin-bottom:8px"><span id="mainBar"></span></div>
@@ -698,8 +722,10 @@
           <li><label><input type="checkbox" data-id="desktop"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs desktop"><svg><use href="#l-claude"/></svg></span><span class="txt"><b>Claude Desktop</b> установлен и открывается</span><span class="tag">Шаг 2</span></label></li>
           <li><label><input type="checkbox" data-id="python"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs python"><svg><use href="#l-python"/></svg></span><span class="txt"><code data-only="win">python --version</code><code data-only="mac">python3.12 --version</code> показывает 3.12.x</span><span class="tag">Шаг 3</span></label></li>
           <li><label><input type="checkbox" data-id="git"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs git"><svg><use href="#l-git"/></svg></span><span class="txt"><code>git --version</code> показывает версию</span><span class="tag">Шаг 3</span></label></li>
+          <li><label><input type="checkbox" data-id="gh"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs ghcli"><svg><use href="#l-github"/></svg></span><span class="txt"><code>gh --version</code> показывает версию</span><span class="tag">Шаг 3</span></label></li>
           <li><label><input type="checkbox" data-id="glab"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs glab"><svg><use href="#l-gitlab"/></svg></span><span class="txt"><code>glab --version</code> показывает версию</span><span class="tag">Шаг 3</span></label></li>
           <li><label><input type="checkbox" data-id="node"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs node"><svg><use href="#l-node"/></svg></span><span class="txt"><code>node --version</code> показывает версию</span><span class="tag">Шаг 3</span></label></li>
+          <li><label><input type="checkbox" data-id="ghauth"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs ghcli"><svg><use href="#l-github"/></svg></span><span class="txt"><code>gh auth login</code> выполнен успешно</span><span class="tag">Шаг 4</span></label></li>
           <li><label><input type="checkbox" data-id="glabauth"><span class="box"><svg><use href="#i-check"/></svg></span><span class="app xs glab"><svg><use href="#l-gitlab"/></svg></span><span class="txt"><code>glab auth login</code> выполнен успешно</span><span class="tag">Шаг 4</span></label></li>
         </ul>
         <div class="success" id="success"><svg><use href="#i-party"/></svg>Всё готово! Рабочее место настроено — увидимся на обучении.</div>
@@ -724,7 +750,7 @@
           <div class="faq-body"><p><b>Причина:</b> защита Gatekeeper при первом запуске.</p><p><b>Решение:</b> откройте «Системные настройки» → «Конфиденциальность и безопасность», внизу нажмите «Всё равно открыть». Скачивайте Claude только с <a href="https://claude.ai/download" target="_blank" rel="noopener">claude.ai/download</a>.</p></div>
         </details>
         <details data-only="mac">
-          <summary><code>python3.12</code> / <code>glab</code> не находится после установки</summary>
+          <summary><code>python3.12</code> / <code>gh</code> / <code>glab</code> не находится после установки</summary>
           <div class="faq-body"><p><b>Решение:</b> закройте Терминал (<kbd>⌘</kbd>+<kbd>Q</kbd>) и откройте заново. Если не помогло — выполните пункт 3 шага 3 и проверьте снова.</p></div>
         </details>
         <details data-only="win">
@@ -732,7 +758,7 @@
           <div class="faq-body"><p><b>Причина:</b> старая версия Windows или не установлен «App Installer».</p><p><b>Решение:</b> обновите Windows или установите «App Installer» из Microsoft Store.</p></div>
         </details>
         <details data-only="win">
-          <summary><code>glab</code> / <code>python</code> не распознаётся после установки</summary>
+          <summary><code>gh</code> / <code>glab</code> / <code>python</code> не распознаётся после установки</summary>
           <div class="faq-body"><p><b>Причина:</b> не обновился PATH.</p><p><b>Решение:</b> закройте и снова откройте терминал; при необходимости выйдите из Windows и войдите снова.</p></div>
         </details>
         <details data-only="win">
@@ -742,6 +768,10 @@
         <details data-only="win">
           <summary>Claude Desktop не ставится или не открывается</summary>
           <div class="faq-body"><p><b>Причина:</b> политики безопасности или антивирус.</p><p><b>Решение:</b> запустите установщик от имени администратора (правый клик → «Запуск от имени администратора»). Скачивайте только с <a href="https://claude.ai/download" target="_blank" rel="noopener">claude.ai/download</a>.</p></div>
+        </details>
+        <details>
+          <summary><code>gh auth login</code> «завис» на вопросе</summary>
+          <div class="faq-body"><p><b>Причина:</b> команда ждёт ответа в терминале — например, на «Authenticate Git with your GitHub credentials? (Y/n)» или «Press Enter to open github.com».</p><p><b>Решение:</b> кликните в окно терминала и нажмите <code>Y</code> или <kbd>Enter</kbd>. Если браузер не открылся — откройте <a href="https://github.com/login/device" target="_blank" rel="noopener">github.com/login/device</a> и введите код из терминала.</p></div>
         </details>
         <details>
           <summary>Нет аккаунта на одном из сервисов</summary>
