@@ -761,6 +761,10 @@
           <div class="faq-body"><p><b>Причина:</b> не обновился PATH.</p><p><b>Решение:</b> закройте и снова откройте терминал; при необходимости выйдите из Windows и войдите снова.</p></div>
         </details>
         <details data-only="win">
+          <summary><code>python --version</code> показывает не 3.12 (например, 3.13 или 3.9)</summary>
+          <div class="faq-body"><p><b>Причина:</b> на компьютере уже был другой Python, и Windows находит его первым. Python 3.12 при этом установился рядом — это не ошибка.</p><p><b>Решение:</b> проверьте командой <code>py -3.12 --version</code> — должно показаться <code>Python 3.12.x</code>. Если так — отметьте пункт в чек-листе и скажите ведущему, что у вас две версии Python.</p></div>
+        </details>
+        <details data-only="win">
           <summary>Запрос согласия с условиями источника winget</summary>
           <div class="faq-body"><p><b>Причина:</b> первый запуск winget.</p><p><b>Решение:</b> нажмите <code>Y</code> и повторите команду.</p></div>
         </details>
