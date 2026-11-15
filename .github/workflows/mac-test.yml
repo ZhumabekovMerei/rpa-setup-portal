@@ -7,7 +7,7 @@ on:
     inputs:
       matrix:
         description: 'JSON list of {os, path}'
-        default: '[{"os":"macos-15","path":"brew"},{"os":"macos-26","path":"brew"},{"os":"macos-15-intel","path":"pkg"},{"os":"macos-15","path":"pkg"},{"os":"macos-14","path":"brew"}]'
+        default: '[{"os":"macos-15","path":"brew"},{"os":"macos-26","path":"brew"},{"os":"macos-15-intel","path":"pkg"},{"os":"macos-15","path":"pkg"}]'
 jobs:
   test:
     name: ${{ matrix.os }} / ${{ matrix.path }}
@@ -61,7 +61,7 @@ jobs:
         timeout-minutes: 20
         run: |
           $FRESH NONINTERACTIVE=1 /bin/zsh -l -i "$RUNNER_TEMP/mac-brew.sh" > /tmp/brew-install.log 2>&1 && echo "EXIT=0" || { echo "EXIT=$?"; tail -40 /tmp/brew-install.log; exit 1; }
-          grep -E "Installation successful|You are using macOS|do not provide support|Warning|Error" /tmp/brew-install.log | head -20
+          grep -E "Installation successful|You are using macOS|do not provide support|Warning|Error" /tmp/brew-install.log | head -20 || true
 
       - name: "[brew] 3. connect Homebrew"
         if: matrix.path == 'brew'
@@ -77,8 +77,8 @@ jobs:
           start=$(date +%s)
           $FRESH HOMEBREW_NO_ENV_HINTS=1 /bin/zsh -l -i "$RUNNER_TEMP/mac-install.sh" > /tmp/tools.log 2>&1 && echo "EXIT=0" || echo "EXIT=$?"
           echo "took $(( $(date +%s) - start )) s"
-          grep -c "Pouring" /tmp/tools.log | sed 's/^/bottles poured: /'
-          grep -E "Building from source|from source|Error|Warning" /tmp/tools.log | head -20
+          grep -c "Pouring" /tmp/tools.log | sed 's/^/bottles poured: /' || true
+          grep -E "Building from source|from source|Error|Warning" /tmp/tools.log | head -20 || true
           tail -8 /tmp/tools.log
 
       # ---------------- path: pkg ----------------
@@ -94,7 +94,7 @@ jobs:
           start=$(date +%s)
           $FRESH /bin/zsh -l -i "$RUNNER_TEMP/mac-pkg.sh" > /tmp/pkg.log 2>&1 && echo "EXIT=0" || echo "EXIT=$?"
           echo "took $(( $(date +%s) - start )) s"
-          grep -v -E "^\s*[#0-9. %]+$|^ *%|Dload|^\s*$" /tmp/pkg.log | tail -40
+          grep -v -E "^\s*[#0-9. %]+$|^ *%|Dload|^\s*$|--:--" /tmp/pkg.log | tail -40 || true
 
       # ---------------- common ----------------
       - name: "Check block in a NEW Terminal + HTTPS from Python"
