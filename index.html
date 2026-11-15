@@ -580,13 +580,13 @@
             <p>Откройте <b>PowerShell</b> или «Терминал» (Пуск → введите «PowerShell»), нажмите «Копировать» и вставьте блок целиком (<kbd>Ctrl</kbd>+<kbd>V</kbd> или правый клик), затем <kbd>Enter</kbd>.</p>
             <div class="code">
               <div class="code-head"><span>PowerShell</span><button class="copy" type="button" data-copy="win-install"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
-<pre id="win-install"><span class="k">winget</span> install -e --id Python.Python.3.12
-<span class="k">winget</span> install -e --id Git.Git
-<span class="k">winget</span> install -e --id GitHub.cli
-<span class="k">winget</span> install -e --id glab.glab
-<span class="k">winget</span> install -e --id OpenJS.NodeJS.LTS</pre>
+<pre id="win-install"><span class="k">winget</span> install -e --id Python.Python.3.12 -s winget --accept-source-agreements --accept-package-agreements
+<span class="k">winget</span> install -e --id Git.Git -s winget --accept-source-agreements --accept-package-agreements
+<span class="k">winget</span> install -e --id GitHub.cli -s winget --accept-source-agreements --accept-package-agreements
+<span class="k">winget</span> install -e --id GLab.GLab -s winget --accept-source-agreements --accept-package-agreements
+<span class="k">winget</span> install -e --id OpenJS.NodeJS.LTS -s winget --accept-source-agreements --accept-package-agreements</pre>
             </div>
-            <div class="note info" style="margin-top:0"><svg><use href="#i-info"/></svg><div>Если появится запрос на согласие с условиями источника — нажмите <code>Y</code> и <kbd>Enter</kbd>.</div></div>
+            <div class="note info" style="margin-top:0"><svg><use href="#i-info"/></svg><div>Установка идёт 3–5 минут, не закрывайте окно. Windows несколько раз спросит <b>«Разрешить этому приложению вносить изменения?»</b> — каждый раз нажимайте <b>«Да»</b>. Если программа уже стоит, winget напишет <code>Found an existing package already installed</code> или <code>No available upgrade found</code> — это нормально, ничего делать не нужно.</div></div>
           </div>
 
           <div class="substep">
@@ -675,31 +675,30 @@
     <!-- 4. gh + glab -->
     <section id="glab">
       <div class="sec-head"><span class="sec-num">ШАГ 4</span><h2>Вход в GitHub CLI и GitLab CLI</h2><span class="time">≈ 2 мин</span></div>
-      <p class="sec-sub">Свяжите <code>gh</code> и <code>glab</code> со своими аккаунтами GitHub и GitLab из шага 1.</p>
+      <p class="sec-sub">Свяжите <code>gh</code> и <code>glab</code> со своими аккаунтами GitHub и GitLab из шага 1. Команды длинные, потому что в них уже вписаны ответы на технические вопросы — просто скопируйте их кнопкой.</p>
       <div class="card">
         <div class="substep" style="margin-top:0">
           <h3 class="with-icon"><span class="app xs ghcli"><svg><use href="#l-github"/></svg></span>1. GitHub CLI</h3>
           <div class="code">
             <div class="code-head"><span data-only="win">PowerShell</span><span data-only="mac">Терминал</span><button class="copy" type="button" data-copy="gh-login"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
-<pre id="gh-login"><span class="k">gh</span> auth login</pre>
+<pre id="gh-login"><span class="k">gh</span> auth login --hostname github.com --git-protocol https --web</pre>
           </div>
           <ol class="steps" style="margin-top:16px">
-            <li><div>Где используете GitHub — выберите <code>GitHub.com</code>.</div></li>
-            <li><div>Протокол — <code>HTTPS</code>. На вопрос «Authenticate Git with your GitHub credentials?» нажмите <code>Y</code>.</div></li>
-            <li><div>Способ входа — <b>Login with a web browser</b>. Терминал покажет <b>одноразовый код</b> вида <code>ABCD-1234</code>: запомните его и нажмите <kbd>Enter</kbd>.</div></li>
-            <li><div>В браузере войдите в <b>тот же аккаунт GitHub</b>, введите код и нажмите «Authorize». В терминале появится <code>✓ Logged in as …</code>.</div></li>
+            <li><div>На вопрос <code>Authenticate Git with your GitHub credentials? (Y/n)</code> нажмите <kbd>Enter</kbd> (это «да»).</div></li>
+            <li><div>Терминал покажет <b>одноразовый код</b> вида <code>ABCD-1234</code> — запомните его и нажмите <kbd>Enter</kbd>, откроется браузер.</div></li>
+            <li><div>Войдите в <b>тот же аккаунт GitHub</b>, введите код, нажмите <b>Continue</b> → <b>Authorize</b>. В терминале появится <code>✓ Logged in as …</code>.</div></li>
           </ol>
         </div>
         <div class="substep">
           <h3 class="with-icon"><span class="app xs glab"><svg><use href="#l-gitlab"/></svg></span>2. GitLab CLI</h3>
           <div class="code">
             <div class="code-head"><span data-only="win">PowerShell</span><span data-only="mac">Терминал</span><button class="copy" type="button" data-copy="glab-login"><svg><use href="#i-copy"/></svg><span>Копировать</span></button></div>
-<pre id="glab-login"><span class="k">glab</span> auth login</pre>
+<pre id="glab-login"><span class="k">glab</span> auth login --hostname gitlab.com --web --git-protocol https --container-registry-domains "gitlab.com,gitlab.com:443,registry.gitlab.com"</pre>
           </div>
           <ol class="steps" style="margin-top:16px">
-            <li><div>На вопрос о сервере выберите <code>gitlab.com</code>.</div></li>
-            <li><div>Способ входа — <b>через браузер</b> (Web).</div></li>
-            <li><div>В открывшемся окне войдите в <b>тот же аккаунт GitLab</b> и подтвердите доступ. В терминале появится сообщение об успешном входе.</div></li>
+            <li><div>На вопрос <code>Authenticate Git with your GitLab credentials?</code> нажмите <kbd>Enter</kbd> (выбрано «Yes»).</div></li>
+            <li><div>Откроется браузер: войдите в <b>тот же аккаунт GitLab</b> и нажмите <b>Authorize</b>.</div></li>
+            <li><div>В терминале появится <code>✓ Logged in to gitlab.com as …</code>. Если браузер не открылся — скопируйте ссылку из терминала в браузер.</div></li>
           </ol>
         </div>
       </div>
@@ -755,7 +754,7 @@
         </details>
         <details data-only="win">
           <summary><code>winget</code> не распознан</summary>
-          <div class="faq-body"><p><b>Причина:</b> старая версия Windows или не установлен «App Installer».</p><p><b>Решение:</b> обновите Windows или установите «App Installer» из Microsoft Store.</p></div>
+          <div class="faq-body"><p><b>Причина:</b> «App Installer» (в нём живёт winget) ещё не зарегистрирован — так бывает на новом компьютере — или его нет в старой Windows.</p><p><b>Решение:</b> выполните в PowerShell команду ниже и откройте PowerShell заново:</p><p><code>Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe</code></p><p>Не помогло — установите или обновите «App Installer» в Microsoft Store, либо обновите Windows. Если Store закрыт в организации — обратитесь в ИТ.</p></div>
         </details>
         <details data-only="win">
           <summary><code>gh</code> / <code>glab</code> / <code>python</code> не распознаётся после установки</summary>
@@ -772,6 +771,14 @@
         <details>
           <summary><code>gh auth login</code> «завис» на вопросе</summary>
           <div class="faq-body"><p><b>Причина:</b> команда ждёт ответа в терминале — например, на «Authenticate Git with your GitHub credentials? (Y/n)» или «Press Enter to open github.com».</p><p><b>Решение:</b> кликните в окно терминала и нажмите <code>Y</code> или <kbd>Enter</kbd>. Если браузер не открылся — откройте <a href="https://github.com/login/device" target="_blank" rel="noopener">github.com/login/device</a> и введите код из терминала.</p></div>
+        </details>
+        <details data-only="win">
+          <summary>Окно «Разрешить этому приложению вносить изменения?»</summary>
+          <div class="faq-body"><p><b>Причина:</b> Git, GitHub CLI и Node.js ставятся для всех пользователей компьютера.</p><p><b>Решение:</b> нажмите «Да». Если просит пароль администратора, которого у вас нет, — обратитесь в ИТ.</p></div>
+        </details>
+        <details data-only="win">
+          <summary><code>No package found matching input criteria</code></summary>
+          <div class="faq-body"><p><b>Причина:</b> опечатка в команде или устаревший каталог winget.</p><p><b>Решение:</b> копируйте команды только кнопкой «Копировать». Если ошибка повторяется — выполните <code>winget source update</code> и повторите.</p></div>
         </details>
         <details>
           <summary>Нет аккаунта на одном из сервисов</summary>
