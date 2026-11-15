@@ -1,0 +1,98 @@
+# Проверка команд сайта на macOS. Запуск: вкладка Actions -> mac-install-test -> Run workflow
+# (или: gh workflow run mac-test.yml). Команды берутся прямо из index.html.
+name: mac-install-test
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-26, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 50
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract commands from index.html (exactly as the site shows)
+        run: |
+          /usr/bin/python3 - <<'PY'
+          import re, html, os
+          s = open('index.html', encoding='utf-8').read()
+          for id in ['mac-brewcheck','mac-brew','mac-path','mac-install','mac-check','gh-login','glab-login']:
+              m = re.search(r'<pre id="%s">(.*?)</pre>' % id, s, re.S)
+              txt = html.unescape(re.sub(r'<[^>]+>', '', m.group(1)))
+              open(os.path.join(os.environ['RUNNER_TEMP'], id + '.sh'), 'w').write(txt + '\n')
+              print('=====', id); print(txt)
+          PY
+          uname -m; sw_vers
+
+      - name: Make a clean Mac (remove Homebrew, reset shell profiles)
+        run: |
+          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)" >/tmp/uninstall.log 2>&1; echo "uninstall exit=$?"; tail -3 /tmp/uninstall.log
+          sudo rm -rf /opt/homebrew /usr/local/Homebrew /usr/local/Cellar /usr/local/Caskroom 2>/dev/null || true
+          for f in .zprofile .zshrc .zshenv .zlogin .bash_profile .bashrc .profile; do [ -f ~/$f ] && mv ~/$f ~/$f.runner-bak; done
+          echo "--- in a fresh Terminal now:"
+          env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/zsh -l -i -c 'for c in brew python3.12 git gh glab node; do printf "%-10s -> %s\n" $c "$(whence -p $c)"; done' 2>&1 | grep -- '->'
+
+      - name: "STEP 3.1 - brew --version (expect: command not found)"
+        run: |
+          env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/zsh -l -i "$RUNNER_TEMP/mac-brewcheck.sh" 2>&1 | tail -3 || true
+          exit 0
+
+      - name: "STEP 3.2 - install Homebrew (site command; NONINTERACTIVE replaces pressing Enter)"
+        timeout-minutes: 20
+        run: |
+          cat "$RUNNER_TEMP/mac-brew.sh"
+          env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin NONINTERACTIVE=1 \
+            /bin/zsh -l -i "$RUNNER_TEMP/mac-brew.sh" > /tmp/brew-install.log 2>&1; echo "EXIT=$?"
+          grep -E "Installation successful|Next steps|Run these|shellenv|Warning|Error|zprofile" /tmp/brew-install.log | head -20
+
+      - name: "STEP 3.3 - connect Homebrew (site: Apple Silicon only)"
+        run: |
+          if [ "$(uname -m)" = "arm64" ]; then
+            env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/zsh -l -i "$RUNNER_TEMP/mac-path.sh"; echo "EXIT=$?"
+            echo "--- ~/.zprofile:"; cat ~/.zprofile
+          else
+            echo "Intel Mac: site says skip this step"
+          fi
+          echo "--- brew in a NEW Terminal:"
+          env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/zsh -l -i -c 'whence -p brew; brew --version' 2>&1 | tail -3
+
+      - name: "STEP 3.4 - install all tools (site command)"
+        timeout-minutes: 30
+        run: |
+          cat "$RUNNER_TEMP/mac-install.sh"
+          env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin HOMEBREW_NO_ENV_HINTS=1 \
+            /bin/zsh -l -i "$RUNNER_TEMP/mac-install.sh" > /tmp/tools.log 2>&1; echo "EXIT=$?"
+          grep -E "^==> (Installing|Pouring|Summary|Caveats)|Error|Warning|already installed|Linking|keg-only" /tmp/tools.log | head -40
+          tail -15 /tmp/tools.log
+
+      - name: "STEP 3.5 - new Terminal + check block"
+        run: |
+          fail=0
+          while IFS= read -r l; do
+            [ -z "$l" ] && continue
+            c=${l%% *}
+            echo "################ $l"
+            out=$(env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/zsh -l -i -c "whence -p $c; $l" 2>&1)
+            echo "$out"
+            echo "$out" | grep -qiE "command not found|no such file" && { echo "MISSING: $c"; fail=$((fail+1)); }
+          done < "$RUNNER_TEMP/mac-check.sh"
+          exit $fail
+
+      - name: "STEP 4 - login commands start correctly (stopped after 25s)"
+        run: |
+          for f in gh-login glab-login; do
+            l=$(head -1 "$RUNNER_TEMP/$f.sh")
+            echo "################ $l"
+            env -i HOME="$HOME" USER="$USER" TERM=xterm-256color SHELL=/bin/zsh PATH=/usr/bin:/bin:/usr/sbin:/sbin BROWSER=echo \
+              /bin/zsh -l -c "$l" > "/tmp/$f.out" 2>&1 < /dev/null &
+            pid=$!; sleep 25
+            if kill -0 $pid 2>/dev/null; then echo "still running after 25s (waiting for browser) -> OK"; kill $pid; else wait $pid; echo "exited with $?"; fi
+            cat "/tmp/$f.out"
+          done
+          exit 0
