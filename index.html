@@ -253,6 +253,62 @@
   .shot-zoom svg { width: min(1100px, 100%); height: auto; max-height: 88vh; border-radius: 14px; background: #fff; }
   .shot-zoom p { position: absolute; bottom: 14px; left: 0; right: 0; text-align: center; color: #eee; font-size: 14px; margin: 0; padding: 0 16px; }
 
+  /* Intro slides */
+  .deck { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 26px 26px 18px; outline: none; }
+  .deck:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+  .deck-track { display: grid; }
+  .slide { grid-area: 1 / 1; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 28px; align-items: center; transition: opacity .25s ease, transform .25s ease; }
+  .deck.js .slide { opacity: 0; visibility: hidden; transform: translateX(12px); }
+  .deck.js .slide.active { opacity: 1; visibility: visible; transform: none; }
+  .deck:not(.js) .deck-track { gap: 34px; }
+  .deck:not(.js) .slide { grid-area: auto; }
+  .deck:not(.js) .deck-nav { display: none; }
+  .slide-kicker { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .slide h3 { font-size: 23px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.01em; }
+  .slide p { margin: 0 0 10px; }
+  .slide-list, .flow, .why-list { margin: 6px 0 0; padding-left: 20px; }
+  .slide-list li, .flow li { margin: 4px 0; }
+  .flow li::marker { color: var(--accent); font-weight: 700; }
+  .slide-note { font-size: 13.5px; color: var(--muted); background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+  .slide-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .slide-chips span { font-size: 13px; background: var(--accent-soft); border-radius: 999px; padding: 5px 11px; }
+  .why-list { list-style: none; padding: 0; margin-bottom: 16px; }
+  .why-list li { display: flex; gap: 10px; align-items: center; margin: 7px 0; }
+  .why-list .app { flex: none; }
+  .slide-visual svg { display: block; width: 100%; height: auto; max-height: 260px; }
+  .slide-visual .v-card { fill: var(--surface-2); }
+  .slide-visual .v-soft { fill: var(--accent-soft); }
+  .slide-visual .v-ink { fill: var(--text); }
+  .slide-visual .v-muted { fill: var(--muted); }
+  .slide-visual .v-muted-s { stroke: var(--muted); }
+  .slide-visual .v-accent { fill: var(--accent); }
+  .slide-visual .v-accent-t { fill: var(--accent); }
+  .slide-visual .v-accent-s { stroke: var(--accent); }
+  .slide-visual .v-on, .slide-visual .v-on-t { fill: var(--accent-ink); }
+  .slide-visual .v-ok { fill: var(--ok); }
+  .slide-visual .v-ok-s { stroke: var(--ok); }
+  .slide-visual .v-code { fill: #1e1f22; }
+  .prd-sample { background: var(--surface-2); border-radius: 14px; padding: 16px 18px; font-size: 13.5px; }
+  .prd-head { font-weight: 700; margin-bottom: 10px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+  .prd-sample dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 7px 12px; }
+  .prd-sample dt { font-weight: 700; color: var(--accent); }
+  .prd-sample dd { margin: 0; }
+  .deck-nav { display: flex; align-items: center; gap: 12px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .deck-dots { display: flex; gap: 6px; flex: 1; min-width: 0; justify-content: center; }
+  .deck-dots button { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 0; background: var(--border); cursor: pointer; transition: width .2s, background .2s; }
+  .deck-dots button[aria-current="true"] { width: 26px; border-radius: 5px; background: var(--accent); }
+  .deck-count { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 38px; text-align: center; }
+  @media (max-width: 760px) {
+    .deck { padding: 18px 16px 14px; }
+    .slide { grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: start; }
+    .slide-visual { order: -1; max-width: 360px; }
+    .slide h3 { font-size: 20px; }
+    .deck-nav { gap: 8px; }
+    .deck-nav .btn { padding-left: 12px; padding-right: 12px; }
+    .deck-count { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .slide { transition: none; } }
+
   /* OS switch (global) */
   html[data-os="win"] [data-only="mac"],
   html[data-os="mac"] [data-only="win"] { display: none !important; }
@@ -434,6 +490,7 @@
   <aside class="sidebar">
     <div class="brand"><span class="brand-mark">R</span> RPA Setup Portal</div>
     <ul class="toc" id="toc">
+      <li><a href="#intro"><span class="n">i</span>Что такое RPA</a></li>
       <li><a href="#before"><span class="n">0</span>Перед началом</a></li>
       <li><a href="#accounts"><span class="n">1</span>Аккаунты</a></li>
       <li><a href="#desktop"><span class="n">2</span>Claude Desktop</a></li>
@@ -484,6 +541,180 @@
         </div>
       </div>
     </header>
+
+    <!-- Введение: что такое RPA и PRD -->
+    <section id="intro">
+      <div class="sec-head"><span class="sec-num">ВВЕДЕНИЕ</span><h2>Что такое RPA и PRD</h2><span class="time">≈ 2 мин</span></div>
+      <p class="sec-sub">6 коротких слайдов — листайте по порядку. Установку можно начать и без них: <a href="#before">к шагу 0 ↓</a></p>
+      <div class="deck" id="deck" tabindex="0" role="region" aria-roledescription="карусель" aria-label="Введение: RPA и PRD">
+        <div class="deck-track">
+
+          <article class="slide" aria-roledescription="слайд" aria-label="1 из 6">
+            <div class="slide-text">
+              <span class="slide-kicker">1 · RPA</span>
+              <h3>RPA — программный робот для рутины</h3>
+              <p><b>RPA</b> (Robotic Process Automation — «роботизированная автоматизация процессов») — это программа, которая выполняет за человека повторяющиеся действия на компьютере.</p>
+              <p>Робот не железный: это небольшой скрипт на вашем ПК. Он открывает файлы, переносит данные между таблицами и системами, заполняет формы и собирает отчёты.</p>
+              <p><b>Робот подходит, если:</b></p>
+              <ul class="slide-list">
+                <li>задача повторяется каждый день или неделю;</li>
+                <li>есть чёткие правила «если — то»;</li>
+                <li>работа с файлами, таблицами, почтой, выгрузками.</li>
+              </ul>
+            </div>
+            <div class="slide-visual" aria-hidden="true">
+              <svg viewBox="0 0 320 220">
+                <g class="v-card"><rect x="8" y="14" width="86" height="54" rx="10"/><rect x="8" y="83" width="86" height="54" rx="10"/><rect x="8" y="152" width="86" height="54" rx="10"/></g>
+                <g class="v-ink" font-size="11" font-weight="600"><text x="51" y="59" text-anchor="middle">Excel</text><text x="51" y="128" text-anchor="middle">Почта</text><text x="51" y="197" text-anchor="middle">Папки</text></g>
+                <g class="v-muted-s" stroke-width="2" fill="none"><path d="M36 26h30M36 34h30M36 42h30M46 26v16M56 26v16"/><path d="M34 96h34v18H34zM34 96l17 11 17-11"/><path d="M33 166h14l4 5h18v15H33z"/></g>
+                <g class="v-accent-s" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M98 41C130 41 128 110 146 110M98 110h48M98 179C130 179 128 110 146 110"/><path d="M140 104l7 6-7 6"/><path d="M218 110h36"/><path d="M248 104l7 6-7 6"/></g>
+                <g><rect class="v-accent" x="150" y="78" width="64" height="64" rx="16"/><circle class="v-on" cx="170" cy="105" r="6"/><circle class="v-on" cx="194" cy="105" r="6"/><rect class="v-on" x="168" y="120" width="28" height="5" rx="2.5"/><rect class="v-accent" x="179" y="64" width="6" height="14" rx="3"/><circle class="v-accent" cx="182" cy="62" r="6"/></g>
+                <text class="v-ink" x="182" y="162" text-anchor="middle" font-size="12" font-weight="700">Робот</text>
+                <g><rect class="v-card" x="258" y="80" width="54" height="64" rx="8"/><path class="v-muted-s" d="M268 98h34M268 108h34M268 118h22" stroke-width="2"/><rect class="v-ok" x="268" y="126" width="16" height="8" rx="2"/></g>
+                <text class="v-ink" x="285" y="162" text-anchor="middle" font-size="12" font-weight="700">Отчёт</text>
+              </svg>
+            </div>
+          </article>
+
+          <article class="slide" aria-roledescription="слайд" aria-label="2 из 6">
+            <div class="slide-text">
+              <span class="slide-kicker">2 · Персональный робот</span>
+              <h3>Робота делаете вы сами — вместе с Claude</h3>
+              <p>Раньше для RPA нужны были программисты и дорогие платформы. Теперь вы <b>описываете задачу обычными словами</b>, а Claude пишет робота на Python. Вы запускаете его на своём компьютере и дорабатываете вместе с Claude.</p>
+              <p>«Персональный» — значит под вашу личную рутину: ту, что знаете только вы.</p>
+              <div class="slide-chips">
+                <span>Свести 20 Excel-файлов в один отчёт</span>
+                <span>Разложить файлы по папкам по дате</span>
+                <span>Сверить две выгрузки и найти расхождения</span>
+                <span>Собрать данные с сайта в таблицу</span>
+              </div>
+            </div>
+            <div class="slide-visual" aria-hidden="true">
+              <svg viewBox="0 0 320 220">
+                <rect class="v-card" x="4" y="10" width="244" height="58" rx="14"/>
+                <text class="v-ink" x="18" y="34" font-size="12">«Каждый понедельник собери</text>
+                <text class="v-ink" x="18" y="52" font-size="12">отчёт из папки „Продажи“»</text>
+                <text class="v-muted" x="18" y="84" font-size="10.5">— вы пишете задачу</text>
+                <rect x="262" y="84" width="46" height="46" rx="12" fill="#d97757"/>
+                <svg x="271" y="93" width="28" height="28" viewBox="0 0 24 24"><use href="#l-claude" color="#ffffff"/></svg>
+                <text class="v-muted" x="285" y="146" font-size="10.5" text-anchor="middle">Claude</text>
+                <rect class="v-code" x="70" y="116" width="170" height="98" rx="12"/>
+                <text x="84" y="136" font-size="10.5" fill="#9aa0a6" font-family="ui-monospace, Menlo, Consolas, monospace">robot.py</text>
+                <g font-size="10.5" font-family="ui-monospace, Menlo, Consolas, monospace"><text x="84" y="156" fill="#c792ea">for</text><text x="106" y="156" fill="#e6e6e6">f in папка:</text><text x="96" y="172" fill="#e6e6e6">лист = открыть(f)</text><text x="96" y="188" fill="#e6e6e6">итог += лист</text><text x="84" y="204" fill="#9ccc65">сохранить(отчёт)</text></g>
+                <path class="v-accent-s" d="M262 112C248 112 236 104 228 72M285 154C285 176 270 180 244 180" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+              </svg>
+            </div>
+          </article>
+
+          <article class="slide" aria-roledescription="слайд" aria-label="3 из 6">
+            <div class="slide-text">
+              <span class="slide-kicker">3 · PRD</span>
+              <h3>PRD — техническое задание для робота</h3>
+              <p><b>PRD</b> (Product Requirements Document — «документ требований к продукту») — короткий текстовый файл, в котором вы описываете, <b>что должен делать робот</b>.</p>
+              <p>Для Claude это техзадание: чем понятнее PRD, тем точнее робот получается с первой попытки и тем меньше переделок.</p>
+              <p class="slide-note">Кстати, этот сайт тоже сделан по PRD: сначала описали, что нужно участникам, потом Claude собрал страницу.</p>
+            </div>
+            <div class="slide-visual" aria-hidden="true">
+              <svg viewBox="0 0 320 220">
+                <rect class="v-card" x="56" y="6" width="208" height="208" rx="12"/>
+                <text class="v-ink" x="74" y="32" font-size="13" font-weight="700">PRD.md</text>
+                <g font-size="11.5" font-weight="600">
+                  <rect class="v-soft" x="70" y="44" width="180" height="26" rx="7"/><text class="v-accent-t" x="80" y="61">1. Цель</text>
+                  <rect class="v-soft" x="70" y="76" width="180" height="26" rx="7"/><text class="v-accent-t" x="80" y="93">2. Что на входе</text>
+                  <rect class="v-soft" x="70" y="108" width="180" height="26" rx="7"/><text class="v-accent-t" x="80" y="125">3. Шаги</text>
+                  <rect class="v-soft" x="70" y="140" width="180" height="26" rx="7"/><text class="v-accent-t" x="80" y="157">4. Что на выходе</text>
+                  <rect class="v-soft" x="70" y="172" width="180" height="26" rx="7"/><text class="v-accent-t" x="80" y="189">5. Ограничения</text>
+                </g>
+              </svg>
+            </div>
+          </article>
+
+          <article class="slide" aria-roledescription="слайд" aria-label="4 из 6">
+            <div class="slide-text">
+              <span class="slide-kicker">4 · Пример PRD</span>
+              <h3>Как выглядит PRD на практике</h3>
+              <p>Не нужен ни специальный формат, ни программирование — достаточно пяти пунктов простыми словами. Такой текст можно сразу отдать Claude.</p>
+              <p>Хороший PRD отвечает на вопросы: <b>зачем</b>, <b>откуда берём данные</b>, <b>что с ними делаем</b>, <b>что получаем</b> и <b>чего делать нельзя</b>.</p>
+            </div>
+            <div class="slide-visual">
+              <div class="prd-sample">
+                <div class="prd-head">PRD — Еженедельный отчёт</div>
+                <dl>
+                  <dt>Цель</dt><dd>Каждый понедельник собирать отчёт о продажах по филиалам.</dd>
+                  <dt>На входе</dt><dd>Папка «Продажи» с Excel-файлами филиалов.</dd>
+                  <dt>Шаги</dt><dd>Открыть все файлы → взять лист «Итог» → сложить по филиалам.</dd>
+                  <dt>На выходе</dt><dd>Файл «Отчёт_ДАТА.xlsx» с таблицей и общей суммой.</dd>
+                  <dt>Ограничения</dt><dd>Исходные файлы не изменять.</dd>
+                </dl>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide" aria-roledescription="слайд" aria-label="5 из 6">
+            <div class="slide-text">
+              <span class="slide-kicker">5 · Как это работает</span>
+              <h3>Путь робота — от задачи до репозитория</h3>
+              <ol class="flow">
+                <li><b>Задача.</b> Выбираете рутину, которая отнимает время.</li>
+                <li><b>PRD.</b> Описываете её по пяти пунктам.</li>
+                <li><b>Claude.</b> Отдаёте PRD в Claude Desktop — он пишет робота на Python.</li>
+                <li><b>Проверка.</b> Запускаете робота, смотрите результат, просите Claude поправить.</li>
+                <li><b>Репозиторий.</b> Сохраняете готового робота в GitHub или GitLab — с историей версий.</li>
+              </ol>
+            </div>
+            <div class="slide-visual" aria-hidden="true">
+              <svg viewBox="0 0 320 220">
+                <g class="v-accent-s" stroke-width="2" fill="none" stroke-dasharray="4 4"><path d="M60 46h200M260 46c34 0 34 64 0 64H60c-34 0-34 64 0 64h80"/></g>
+                <g font-weight="700" font-size="13">
+                  <circle class="v-accent" cx="40" cy="46" r="20"/><text class="v-on-t" x="40" y="51" text-anchor="middle">1</text>
+                  <circle class="v-accent" cx="160" cy="46" r="20"/><text class="v-on-t" x="160" y="51" text-anchor="middle">2</text>
+                  <circle class="v-accent" cx="280" cy="46" r="20"/><text class="v-on-t" x="280" y="51" text-anchor="middle">3</text>
+                  <circle class="v-accent" cx="160" cy="110" r="20"/><text class="v-on-t" x="160" y="115" text-anchor="middle">4</text>
+                  <circle class="v-accent" cx="160" cy="174" r="20"/><text class="v-on-t" x="160" y="179" text-anchor="middle">5</text>
+                </g>
+                <g class="v-ink" font-size="11" font-weight="600" text-anchor="middle">
+                  <text x="40" y="84">Задача</text><text x="160" y="84">PRD</text><text x="280" y="84">Claude</text>
+                  <text x="160" y="146">Проверка</text><text x="160" y="210">GitHub / GitLab</text>
+                </g>
+              </svg>
+            </div>
+          </article>
+
+          <article class="slide" aria-roledescription="слайд" aria-label="6 из 6">
+            <div class="slide-text">
+              <span class="slide-kicker">6 · Подготовка</span>
+              <h3>Зачем ставим каждую программу</h3>
+              <ul class="why-list">
+                <li><span class="app xs desktop"><svg><use href="#l-claude"/></svg></span><span><b>Claude Desktop</b> — здесь вы пишете PRD и общаетесь с Claude.</span></li>
+                <li><span class="app xs python"><svg><use href="#l-python"/></svg></span><span><b>Python 3.12</b> — язык, на котором работают роботы.</span></li>
+                <li><span class="app xs git"><svg><use href="#l-git"/></svg></span><span><b>Git + GitHub / GitLab</b> — хранение кода роботов и истории изменений.</span></li>
+                <li><span class="app xs ghcli"><svg><use href="#l-github"/></svg></span><span><b>GitHub CLI и GitLab CLI</b> — связь терминала с вашими аккаунтами.</span></li>
+                <li><span class="app xs node"><svg><use href="#l-node"/></svg></span><span><b>Node.js</b> — подключает Claude к файлам и сервисам (MCP-серверы).</span></li>
+              </ul>
+              <a class="btn btn-primary" href="#before">Начать подготовку <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="slide-visual" aria-hidden="true">
+              <svg viewBox="0 0 320 220">
+                <rect class="v-card" x="40" y="20" width="240" height="180" rx="16"/>
+                <text class="v-ink" x="160" y="58" text-anchor="middle" font-size="15" font-weight="700">≈ 10 минут</text>
+                <text class="v-muted" x="160" y="78" text-anchor="middle" font-size="11.5">и рабочее место готово</text>
+                <g class="v-ok-s" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M72 106l6 6 12-12"/><path d="M72 136l6 6 12-12"/><path d="M72 166l6 6 12-12"/>
+                </g>
+                <g class="v-ink" font-size="12"><text x="102" y="112">3 аккаунта</text><text x="102" y="142">Claude Desktop</text><text x="102" y="172">5 программ</text></g>
+              </svg>
+            </div>
+          </article>
+
+        </div>
+        <div class="deck-nav">
+          <button class="btn btn-ghost" type="button" data-deck="prev" aria-label="Предыдущий слайд">← Назад</button>
+          <div class="deck-dots" role="group" aria-label="Слайды"></div>
+          <span class="deck-count" aria-live="polite">1 / 6</span>
+          <button class="btn btn-primary" type="button" data-deck="next" aria-label="Следующий слайд">Далее →</button>
+        </div>
+      </div>
+    </section>
 
     <!-- 0. Перед началом -->
     <section id="before">
@@ -982,6 +1213,57 @@
   });
   var savedMac = read(MACPATH_KEY);
   setMacPath(savedMac === 'pkg' ? 'pkg' : 'brew', false);
+
+  /* ---------- Intro slides ---------- */
+  (function () {
+    var deck = document.getElementById('deck');
+    if (!deck) return;
+    var slides = deck.querySelectorAll('.slide');
+    var dots = deck.querySelector('.deck-dots');
+    var count = deck.querySelector('.deck-count');
+    var prev = deck.querySelector('[data-deck="prev"]');
+    var next = deck.querySelector('[data-deck="next"]');
+    var cur = 0;
+    deck.classList.add('js');
+    dots.innerHTML = '';
+    slides.forEach(function (s, i) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.setAttribute('aria-label', 'Слайд ' + (i + 1));
+      b.addEventListener('click', function () { go(i); });
+      dots.appendChild(b);
+    });
+    function go(i) {
+      cur = Math.max(0, Math.min(slides.length - 1, i));
+      slides.forEach(function (s, j) {
+        s.classList.toggle('active', j === cur);
+        s.setAttribute('aria-hidden', String(j !== cur));
+        s.querySelectorAll('a, button').forEach(function (el) { el.tabIndex = j === cur ? 0 : -1; });
+      });
+      dots.querySelectorAll('button').forEach(function (b, j) { b.setAttribute('aria-current', String(j === cur)); });
+      count.textContent = (cur + 1) + ' / ' + slides.length;
+      prev.disabled = cur === 0;
+      next.textContent = cur === slides.length - 1 ? 'К установке →' : 'Далее →';
+    }
+    prev.addEventListener('click', function () { go(cur - 1); });
+    next.addEventListener('click', function () {
+      if (cur === slides.length - 1) { document.getElementById('before').scrollIntoView({ behavior: 'smooth' }); return; }
+      go(cur + 1);
+    });
+    deck.addEventListener('keydown', function (e) {
+      if (e.target.closest('input, textarea')) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(cur + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
+    });
+    var x0 = null, y0 = null;
+    deck.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    deck.addEventListener('touchend', function (e) {
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) go(cur + (dx < 0 ? 1 : -1));
+      x0 = null;
+    }, { passive: true });
+    go(0);
+  })();
 
   /* ---------- Illustrations: click to zoom ---------- */
   var zoom = document.createElement('div');
